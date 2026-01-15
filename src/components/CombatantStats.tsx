@@ -1,7 +1,7 @@
 import { Combatant } from "../utils/combatCalculations";
 
 interface CombatantStatsProps {
-  stats: Combatant;
+  stats: Combatant & { itemDropChance?: number };
   showDecimals?: boolean;
 }
 
@@ -41,6 +41,12 @@ export function CombatantStats({
         <span>Speed</span>
         <span className="font-bold">{format(stats.speed)}</span>
       </div>
+      {stats.itemDropChance !== undefined && (
+        <div className="flex justify-between">
+          <span>Drop Chance</span>
+          <span className="font-bold">{stats.itemDropChance}%</span>
+        </div>
+      )}
     </div>
   );
 }

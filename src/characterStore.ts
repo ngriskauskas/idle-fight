@@ -7,6 +7,7 @@ import { Attack, Combatant, resolveAttack } from "./utils/combatCalculations";
 
 export interface CharacterStats extends Combatant {
   speed: number;
+  itemDropChance: number;
   experience: number;
   experienceNeeded: number;
   respawnTime: number;
@@ -35,6 +36,7 @@ export const useCharacterStore = create<CharacterStore>()(
       defense: 100,
       currentDefense: 100,
       speed: 10,
+      itemDropChance: 90,
       level: 1,
       experience: 0,
       experienceNeeded: 100,
@@ -43,10 +45,10 @@ export const useCharacterStore = create<CharacterStore>()(
       statusEffects: [],
       statusStats: {
         poison: 0,
-        bleed: 3,
+        bleed: 0,
         fire: 0,
         ice: 0,
-        lightning: 3,
+        lightning: 0,
       },
     },
     takeDamage: (damage: number) => {

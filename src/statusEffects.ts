@@ -95,7 +95,7 @@ export const ICE_EFFECT: StatusEffect = {
     useSpellStore.setState((state) => {
       state.spells.forEach((spell) => {
         spell.attackCost =
-          spell.baseAttackCost + characterSpeed + effect.stacks;
+          spell.baseAttackCost - characterSpeed + effect.stacks;
       });
     });
   },
@@ -105,7 +105,7 @@ export const ICE_EFFECT: StatusEffect = {
       if (state.enemies[enemyIndex]) {
         const enemy = state.enemies[enemyIndex];
         enemy.spells.forEach((spell) => {
-          spell.attackCost = spell.baseAttackCost + enemy.speed + effect.stacks;
+          spell.attackCost = spell.baseAttackCost - enemy.speed + effect.stacks;
         });
       }
     });

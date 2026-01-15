@@ -1,14 +1,17 @@
 import { Spell } from "../spellTypes";
 import { SpellCard } from "./SpellCard";
+import { StatusStats } from "../utils/combatCalculations";
 
 interface SpellSectionProps {
   spells: Spell[];
   colorClass?: string;
+  combatantStats?: StatusStats;
 }
 
 export function SpellSection({
   spells,
   colorClass = "bg-gradient-to-r from-purple-500 to-purple-600",
+  combatantStats,
 }: SpellSectionProps) {
   return (
     <div className="mt-6">
@@ -19,7 +22,12 @@ export function SpellSection({
       ) : (
         <div className="space-y-3">
           {spells.map((spell) => (
-            <SpellCard key={spell.id} spell={spell} colorClass={colorClass} />
+            <SpellCard
+              key={spell.id}
+              spell={spell}
+              colorClass={colorClass}
+              combatantStats={combatantStats}
+            />
           ))}
         </div>
       )}

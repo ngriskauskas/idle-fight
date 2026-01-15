@@ -48,6 +48,7 @@ export function EnemyCard({ enemy }: EnemyCardProps) {
       {/* Spells */}
       <SpellSection
         spells={enemy.spells}
+        combatantStats={enemy.statusStats}
         colorClass={
           enemy.statusEffects.some((e) => e.type === "ice")
             ? "bg-gradient-to-r from-cyan-500 to-cyan-600"

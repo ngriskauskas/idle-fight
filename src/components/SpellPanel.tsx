@@ -1,15 +1,41 @@
 import { useState } from "react";
 import { useSpellStore } from "../spellStore";
-import type { Spell } from "../spellStore";
+import { useCharacterStore } from "../characterStore";
+import { Spell } from "../spellTypes";
 
 function SpellTooltip({ spell }: { spell: Spell }) {
+  const character = useCharacterStore((state) => state.character);
+  const totalDamage = spell.damage + Math.floor(character.currentAttack);
+
+  const getStatusEffectColor = (effectType: string) => {
+    const colors: Record<string, string> = {
+      poison: "text-purple-400",
+      bleed: "text-red-400",
+      fire: "text-orange-400",
+      ice: "text-cyan-400",
+      lightning: "text-yellow-400",
+    };
+    return colors[effectType] || "text-gray-400";
+  };
+
   return (
     <div className="bg-gray-900 border-2 border-gray-600 rounded p-3 w-48 text-sm">
       <h4 className="font-bold text-white mb-1">{spell.name}</h4>
       <p className="text-gray-300 text-xs mb-2">{spell.description}</p>
       <div className="text-xs text-gray-400 space-y-1">
-        <div>Level: {spell.level}</div>
-        <div>Damage: {spell.damage}</div>
+        <div>Time: {spell.baseAttackCost}</div>
+        <div>Damage: {totalDamage}</div>
+        {spell.statusStats &&
+          Object.entries(spell.statusStats).map(([key, value]) =>
+            value > 0 ? (
+              <div key={key}>
+                <span className={getStatusEffectColor(key)}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </span>
+                : <span className="font-bold">{value}</span>
+              </div>
+            ) : null
+          )}
       </div>
     </div>
   );
@@ -25,6 +51,7 @@ export function SpellPanel() {
   const equipSpell = useSpellStore((state) => state.equipSpell);
   const unequipSpell = useSpellStore((state) => state.unequipSpell);
   const canEquipSpell = useSpellStore((state) => state.canEquipSpell);
+  const character = useCharacterStore((state) => state.character);
 
   const handleMouseEnter = (
     e: React.MouseEvent<HTMLDivElement>,
@@ -93,7 +120,8 @@ export function SpellPanel() {
                       <div>
                         <div className="font-bold text-sm">{spell.name}</div>
                         <div className="text-xs text-gray-200">
-                          Damage: {spell.damage}
+                          Damage:{" "}
+                          {spell.damage + Math.floor(character.currentAttack)}
                         </div>
                       </div>
                     </div>

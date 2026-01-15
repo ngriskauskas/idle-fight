@@ -1,19 +1,9 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { DEFAULT_ITEMS } from "./items";
-
-export interface Item {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  level: number;
-  rarity: "common" | "uncommon" | "rare" | "epic" | "legendary";
-  slot: "body" | "helmet" | "legs" | "boots" | "weapon" | "ring" | "amulet";
-  equipped: boolean;
-  onEquip: () => void;
-  onUnequip: () => void;
-}
+import { type Item } from "./items";
+import { calcItemDrop } from "./itemHelpers";
+import { useCharacterStore } from "./characterStore";
+import { useSpellStore } from "./spellStore";
 
 interface ItemStore {
   items: Item[];
@@ -23,12 +13,13 @@ interface ItemStore {
   getItemById: (itemId: string) => Item | undefined;
   getEquippedInSlot: (slot: string) => Item | undefined;
   addItem: (item: Item) => void;
-  calcDropItem: (enemyLevel: number) => Item | null;
+  calcDropItem: (enemyLevel: number) => void;
+  applyItemEffects: (item: Item, operation: "add" | "remove") => void;
 }
 
 export const useItemStore = create<ItemStore>()(
   immer((set, get) => ({
-    items: DEFAULT_ITEMS,
+    items: [],
     equippedSlots: {
       body: null,
       helmet: null,
@@ -39,6 +30,112 @@ export const useItemStore = create<ItemStore>()(
       ring1: null,
       ring2: null,
       amulet: null,
+    },
+    applyItemEffects: (item: Item, operation: "add" | "remove") => {
+      useCharacterStore.setState((state) => {
+        const allEffects = [...item.mainEffects, ...item.secondaryEffects];
+        const isRemove = operation === "remove";
+
+        allEffects.forEach((effect) => {
+          if (effect.flatDamage !== undefined) {
+            const value = isRemove ? -effect.flatDamage : effect.flatDamage;
+            state.character.attack += value;
+            state.character.currentAttack += value;
+          }
+          if (effect.percentDamage !== undefined) {
+            const multiplier = 1 + effect.percentDamage / 100;
+            state.character.attack = Math.round(
+              isRemove
+                ? state.character.attack / multiplier
+                : state.character.attack * multiplier
+            );
+            state.character.currentAttack = Math.round(
+              isRemove
+                ? state.character.currentAttack / multiplier
+                : state.character.currentAttack * multiplier
+            );
+          }
+          if (effect.flatDefense !== undefined) {
+            const value = isRemove ? -effect.flatDefense : effect.flatDefense;
+            state.character.defense += value;
+            state.character.currentDefense += value;
+          }
+          if (effect.percentDefense !== undefined) {
+            const multiplier = 1 + effect.percentDefense / 100;
+            state.character.defense = Math.round(
+              isRemove
+                ? state.character.defense / multiplier
+                : state.character.defense * multiplier
+            );
+            state.character.currentDefense = Math.round(
+              isRemove
+                ? state.character.currentDefense / multiplier
+                : state.character.currentDefense * multiplier
+            );
+          }
+          if (effect.flatHealth !== undefined) {
+            const value = isRemove ? -effect.flatHealth : effect.flatHealth;
+            state.character.maxHealth += value;
+            state.character.health = Math.max(
+              0,
+              state.character.health + value
+            );
+          }
+          if (effect.percentHealth !== undefined) {
+            const multiplier = 1 + effect.percentHealth / 100;
+            state.character.maxHealth = Math.round(
+              isRemove
+                ? state.character.maxHealth / multiplier
+                : state.character.maxHealth * multiplier
+            );
+            state.character.health = Math.round(
+              isRemove
+                ? state.character.health / multiplier
+                : state.character.health * multiplier
+            );
+          }
+          if (effect.flatSpeed !== undefined) {
+            const value = isRemove ? -effect.flatSpeed : effect.flatSpeed;
+            state.character.speed += value;
+          }
+          if (effect.percentSpeed !== undefined) {
+            const multiplier = 1 + effect.percentSpeed / 100;
+            state.character.speed = Math.round(
+              isRemove
+                ? state.character.speed / multiplier
+                : state.character.speed * multiplier
+            );
+          }
+          if (effect.poison !== undefined) {
+            const value = isRemove ? -effect.poison : effect.poison;
+            state.character.statusStats.poison += value;
+          }
+          if (effect.bleed !== undefined) {
+            const value = isRemove ? -effect.bleed : effect.bleed;
+            state.character.statusStats.bleed += value;
+          }
+          if (effect.fire !== undefined) {
+            const value = isRemove ? -effect.fire : effect.fire;
+            state.character.statusStats.fire += value;
+          }
+          if (effect.ice !== undefined) {
+            const value = isRemove ? -effect.ice : effect.ice;
+            state.character.statusStats.ice += value;
+          }
+          if (effect.lightning !== undefined) {
+            const value = isRemove ? -effect.lightning : effect.lightning;
+            state.character.statusStats.lightning += value;
+          }
+          if (effect.itemDropChance !== undefined) {
+            const value = isRemove
+              ? -effect.itemDropChance
+              : effect.itemDropChance;
+            state.character.itemDropChance += value;
+          }
+        });
+      });
+
+      useSpellStore.getState().recalculateEquippedSpellCosts();
     },
     equipItem: (itemId: string) => {
       set((state) => {
@@ -64,13 +161,13 @@ export const useItemStore = create<ItemStore>()(
             );
             if (prevItem) {
               prevItem.equipped = false;
-              prevItem.onUnequip();
+              get().applyItemEffects(prevItem, "remove");
             }
           }
           // Equip new item
           item.equipped = true;
           state.equippedSlots[targetSlot] = itemId;
-          item.onEquip();
+          get().applyItemEffects(item, "add");
         }
       });
     },
@@ -81,7 +178,7 @@ export const useItemStore = create<ItemStore>()(
           const item = state.items.find((i) => i.id === itemId);
           if (item) {
             item.equipped = false;
-            item.onUnequip();
+            get().applyItemEffects(item, "remove");
             state.equippedSlots[slot] = null;
           }
         }
@@ -105,54 +202,13 @@ export const useItemStore = create<ItemStore>()(
       });
     },
     calcDropItem: (enemyLevel: number) => {
-      if (Math.random() > 0.3) return null;
+      const characterStore = useCharacterStore.getState();
+      const dropChance = characterStore.character.itemDropChance / 100;
 
-      const allItems = get().items;
+      if (Math.random() > dropChance) return;
 
-      const validItems = allItems.filter(
-        (item) => Math.abs(item.level - enemyLevel) <= 2
-      );
-
-      if (validItems.length === 0) return null;
-
-      const rarityChances = {
-        common: 0.4,
-        uncommon: 0.3,
-        rare: 0.2,
-        epic: 0.08,
-        legendary: 0.02,
-      };
-
-      if (enemyLevel > 10) {
-        rarityChances.legendary = 0.05;
-        rarityChances.epic = 0.15;
-        rarityChances.rare = 0.15;
-        rarityChances.uncommon = 0.2;
-        rarityChances.common = 0.45;
-      }
-
-      const rand = Math.random();
-      let selectedRarity: Item["rarity"] = "common";
-      let cumulative = 0;
-
-      for (const [rarity, chance] of Object.entries(rarityChances) as [
-        Item["rarity"],
-        number
-      ][]) {
-        cumulative += chance;
-        if (rand <= cumulative) {
-          selectedRarity = rarity;
-          break;
-        }
-      }
-
-      const itemsOfRarity = validItems.filter(
-        (item) => item.rarity === selectedRarity
-      );
-
-      if (itemsOfRarity.length === 0) return null;
-
-      return itemsOfRarity[Math.floor(Math.random() * itemsOfRarity.length)];
+      const droppedItem = calcItemDrop(enemyLevel);
+      get().addItem(droppedItem);
     },
   }))
 );

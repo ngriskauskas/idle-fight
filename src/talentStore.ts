@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { useCharacterStore } from "./characterStore";
+import { useSpellStore } from "./spellStore";
 
 export interface Talent {
   id: string;
@@ -9,7 +10,6 @@ export interface Talent {
   level: number;
   maxLevel: number;
   category: "attack" | "defense" | "speed" | "status";
-  onLevelUp: () => void;
 }
 
 interface TalentStore {
@@ -28,12 +28,6 @@ const DEFAULT_TALENTS: Talent[] = [
     level: 0,
     maxLevel: 10,
     category: "attack",
-    onLevelUp: () => {
-      useCharacterStore.setState((state) => {
-        state.character.attack += 1;
-        state.character.currentAttack += 1;
-      });
-    },
   },
   {
     id: "poison-strike",
@@ -42,11 +36,6 @@ const DEFAULT_TALENTS: Talent[] = [
     level: 0,
     maxLevel: 5,
     category: "status",
-    onLevelUp: () => {
-      useCharacterStore.setState((state) => {
-        state.character.statusStats.poison += 1;
-      });
-    },
   },
   {
     id: "flame-strike",
@@ -55,11 +44,6 @@ const DEFAULT_TALENTS: Talent[] = [
     level: 0,
     maxLevel: 5,
     category: "status",
-    onLevelUp: () => {
-      useCharacterStore.setState((state) => {
-        state.character.statusStats.fire += 2;
-      });
-    },
   },
   {
     id: "lightning-strike",
@@ -68,11 +52,6 @@ const DEFAULT_TALENTS: Talent[] = [
     level: 0,
     maxLevel: 5,
     category: "status",
-    onLevelUp: () => {
-      useCharacterStore.setState((state) => {
-        state.character.statusStats.lightning += 3;
-      });
-    },
   },
   {
     id: "iron-skin",
@@ -81,26 +60,14 @@ const DEFAULT_TALENTS: Talent[] = [
     level: 0,
     maxLevel: 10,
     category: "defense",
-    onLevelUp: () => {
-      useCharacterStore.setState((state) => {
-        state.character.defense += 1;
-        state.character.currentDefense += 1;
-      });
-    },
   },
   {
     id: "nimble-feet",
     name: "Nimble Feet",
-    description: "-5 Attack cost per level",
+    description: "+1 Speed per level",
     level: 0,
     maxLevel: 5,
     category: "speed",
-    onLevelUp: () => {
-      useCharacterStore.setState((state) => {
-        state.character.attackCost -= 5;
-        state.character.currentAttackCost -= 5;
-      });
-    },
   },
 ];
 
@@ -123,7 +90,43 @@ export const useTalentStore = create<TalentStore>()(
         ) {
           talent.level += 1;
           state.availablePoints -= 1;
-          talent.onLevelUp();
+
+          // Apply talent effects based on ID
+          switch (talentId) {
+            case "increased-attack":
+              useCharacterStore.setState((charState) => {
+                charState.character.attack += 1;
+                charState.character.currentAttack += 1;
+              });
+              break;
+            case "poison-strike":
+              useCharacterStore.setState((charState) => {
+                charState.character.statusStats.poison += 1;
+              });
+              break;
+            case "flame-strike":
+              useCharacterStore.setState((charState) => {
+                charState.character.statusStats.fire += 2;
+              });
+              break;
+            case "lightning-strike":
+              useCharacterStore.setState((charState) => {
+                charState.character.statusStats.lightning += 3;
+              });
+              break;
+            case "iron-skin":
+              useCharacterStore.setState((charState) => {
+                charState.character.defense += 1;
+                charState.character.currentDefense += 1;
+              });
+              break;
+            case "nimble-feet":
+              useCharacterStore.setState((charState) => {
+                charState.character.speed += 1;
+              });
+              useSpellStore.getState().recalculateEquippedSpellCosts();
+              break;
+          }
         }
       });
     },

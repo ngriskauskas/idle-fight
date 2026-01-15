@@ -3,7 +3,12 @@ import { immer } from "zustand/middleware/immer";
 import { useProgressionStore } from "./progressionStore";
 import { useCharacterStore } from "./characterStore";
 import { DEFAULT_ENEMIES } from "./enemies";
-import { Combatant, Attack, resolveAttack } from "./utils/combatCalculations";
+import {
+  Combatant,
+  Attack,
+  resolveAttack,
+  createSpellAttack,
+} from "./utils/combatCalculations";
 import { StatusEffect, createStatusEffect } from "./statusEffects";
 import { Spell } from "./spellTypes";
 import { useItemStore } from "./itemStore";
@@ -19,6 +24,7 @@ export interface Enemy extends Combatant {
 
 interface EnemyStore {
   enemies: Enemy[];
+  enemyKilled: Enemy | null;
   updateEnemies: (enemies: Enemy[]) => void;
   spawnNewEnemy: () => void;
   resetEnemies: () => void;
@@ -39,29 +45,25 @@ const createEnemyForProgression = (
   const level = (world - 1) * 10 + wave;
   const baseMult = isBoss ? 1.5 : 1;
 
-  // Select a random enemy preset
   const preset =
     DEFAULT_ENEMIES[Math.floor(Math.random() * DEFAULT_ENEMIES.length)];
 
-  // Scale preset stats by level
   const health = (preset.baseHealth + level * 10) * baseMult;
   const defense = (preset.baseDefense + level) * baseMult;
   const attack = (preset.baseAttack + level * 5) * baseMult;
   const speed = Math.max(1, 10 - Math.floor(level / 5));
 
-  // Random status stats based on level
   const getRandomStatus = (max: number) => {
     return Math.random() < 0.8 ? Math.floor(Math.random() * max) : 0;
   };
 
   const statusLevel = Math.max(1, level);
 
-  // Clone spells and scale them by level
   const scaledSpells = preset.spells.map((spell) => ({
     ...spell,
     damage: spell.damage + level * 2,
     baseAttackCost: spell.baseAttackCost,
-    attackCost: spell.baseAttackCost + speed,
+    attackCost: spell.baseAttackCost - speed,
     currentAttackCost: 0,
   }));
 
@@ -94,6 +96,7 @@ const createEnemyForProgression = (
 export const useEnemyStore = create<EnemyStore>()(
   immer((set, get) => ({
     enemies: [createEnemyForProgression(1, 1, 1, false)],
+    enemyKilled: null,
     updateEnemies: (enemies: Enemy[]) => set({ enemies }),
     spawnNewEnemy: () =>
       set((state) => {
@@ -131,7 +134,11 @@ export const useEnemyStore = create<EnemyStore>()(
       get().enemies.forEach((enemy) => {
         enemy.spells.forEach((spell) => {
           if (spell.currentAttackCost >= spell.attackCost) {
-            const attack = spell.onCast(enemy);
+            const attack = createSpellAttack(
+              enemy,
+              spell.damage,
+              spell.statusStats || {}
+            );
             characterStore.takeAttack(attack);
 
             set((state) => {
@@ -203,14 +210,11 @@ export const useEnemyStore = create<EnemyStore>()(
       characterStore.gainExperience(deadEnemy.xpReward);
 
       // Calculate item drop
-      const itemStore = useItemStore.getState();
-      const droppedItem = itemStore.calcDropItem(deadEnemy.level);
-      if (droppedItem) {
-        itemStore.addItem(droppedItem);
-      }
+      useItemStore.getState().calcDropItem(deadEnemy.level);
 
       set((state) => {
         state.enemies = state.enemies.filter((e) => e.health > 0);
+        state.enemyKilled = deadEnemy;
       });
 
       const updated = get();

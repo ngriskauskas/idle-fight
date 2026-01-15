@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useItemStore } from "../itemStore";
-import type { Item } from "../itemStore";
+import { Item, ItemEffect } from "../items";
 
 const RARITY_COLORS: Record<string, string> = {
   common: "bg-gray-400",
@@ -22,28 +22,88 @@ const SLOT_DISPLAY: Record<string, string> = {
   amulet: "Amulet",
 };
 
-const EQUIPMENT_SLOTS = [
-  "helmet",
-  "body",
-  "legs",
-  "boots",
-  "weapon1",
-  "weapon2",
-  "ring1",
-  "ring2",
-  "amulet",
-];
-
 function ItemTooltip({ item }: { item: Item }) {
+  const formatEffect = (effectType: string, value: number) => {
+    const isPercent = effectType.startsWith("percent");
+    const baseValue = value > 0 ? `+${value}` : `${value}`;
+    return isPercent ? `${baseValue} %` : baseValue;
+  };
+
+  const formatEffectLabel = (effectType: string) => {
+    if (effectType === "itemDropChance") return "Item Drop Chance";
+    return effectType
+      .replace(/^flat/, "")
+      .replace(/^percent/, "")
+      .replace(/([A-Z])/g, " $1")
+      .trim();
+  };
+
+  const getStatusEffectColor = (effectType: string) => {
+    const colors: Record<string, string> = {
+      poison: "text-purple-400",
+      bleed: "text-red-400",
+      fire: "text-orange-400",
+      ice: "text-blue-400",
+      lightning: "text-yellow-400",
+    };
+    return colors[effectType] || "text-gray-400";
+  };
+
+  const isStatusEffect = (effectType: string) => {
+    return ["poison", "bleed", "fire", "ice", "lightning"].includes(effectType);
+  };
+
   return (
-    <div className="bg-gray-900 border-2 border-gray-600 rounded p-3 w-48 text-sm">
-      <h4 className="font-bold text-white mb-1">{item.name}</h4>
-      <p className="text-gray-300 text-xs mb-2">{item.description}</p>
-      <div className="text-xs text-gray-400">
-        <div>Level: {item.level}</div>
-        <div>Slot: {item.slot}</div>
-        <div>Rarity: {item.rarity}</div>
+    <div className="bg-gray-900 border-2 border-gray-600 rounded p-3 w-56 text-sm">
+      <h4 className="font-bold text-white mb-1">
+        {item.name}{" "}
+        <span className="text-gray-400 text-xs">Lv {item.level}</span>
+      </h4>
+      <div className="text-xs text-gray-400 mb-3">
+        Slot: {item.slot} • Rarity: {item.rarity}
       </div>
+
+      {/* Main Effects */}
+      <div className="mb-3">
+        <div className="text-xs font-bold text-gray-300 mb-1">Main Effects</div>
+        {item.mainEffects.map((effect: ItemEffect, idx: number) => {
+          const [effectType, value] = Object.entries(effect)[0];
+          const colorClass = isStatusEffect(effectType)
+            ? getStatusEffectColor(effectType)
+            : "text-gray-400";
+          const label = isStatusEffect(effectType)
+            ? effectType.charAt(0).toUpperCase() + effectType.slice(1)
+            : formatEffectLabel(effectType);
+          return (
+            <div key={idx} className={`text-xs ${colorClass}`}>
+              {label}: {formatEffect(effectType, value as number)}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Secondary Effects */}
+      {item.secondaryEffects.length > 0 && (
+        <div className="mb-3">
+          <div className="text-xs font-bold text-gray-300 mb-1">
+            Secondary Effects
+          </div>
+          {item.secondaryEffects.map((effect: ItemEffect, idx: number) => {
+            const [effectType, value] = Object.entries(effect)[0];
+            const colorClass = isStatusEffect(effectType)
+              ? getStatusEffectColor(effectType)
+              : "text-gray-500";
+            const label = isStatusEffect(effectType)
+              ? effectType.charAt(0).toUpperCase() + effectType.slice(1)
+              : formatEffectLabel(effectType);
+            return (
+              <div key={idx} className={`text-xs ${colorClass}`}>
+                {label}: {formatEffect(effectType, value as number)}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -53,7 +113,6 @@ export function ItemPanel() {
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
   const items = useItemStore((state) => state.items);
-  const equippedSlots = useItemStore((state) => state.equippedSlots);
   const getEquippedInSlot = useItemStore((state) => state.getEquippedInSlot);
   const equipItem = useItemStore((state) => state.equipItem);
   const unequipItem = useItemStore((state) => state.unequipItem);

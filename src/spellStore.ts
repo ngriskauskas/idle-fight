@@ -3,6 +3,7 @@ import { immer } from "zustand/middleware/immer";
 import type { Spell } from "./spellTypes";
 import { useEnemyStore } from "./enemyStore";
 import { useCharacterStore } from "./characterStore";
+import { createSpellAttack } from "./utils/combatCalculations";
 
 interface SpellStore {
   spells: Spell[];
@@ -22,7 +23,7 @@ interface SpellStore {
 export const useSpellStore = create<SpellStore>()(
   immer((set, get) => ({
     spells: [],
-    equippedSpells: [],
+    equippedSpells: ["strike"],
     maxEquippedSpells: 2,
 
     setSpells: (spells: Spell[]) => {
@@ -39,10 +40,9 @@ export const useSpellStore = create<SpellStore>()(
           !state.equippedSpells.includes(spellId) &&
           state.equippedSpells.length < state.maxEquippedSpells
         ) {
-          // Calculate effective attack cost: base cost + character speed
           const characterStore = useCharacterStore.getState();
           spell.attackCost =
-            spell.baseAttackCost + characterStore.character.speed;
+            spell.baseAttackCost - characterStore.character.speed;
           state.equippedSpells.push(spellId);
         }
       });
@@ -81,7 +81,11 @@ export const useSpellStore = create<SpellStore>()(
 
       equippedSpells.forEach((spell) => {
         if (spell.currentAttackCost >= spell.attackCost) {
-          const attack = spell.onCast(character);
+          const attack = createSpellAttack(
+            character,
+            spell.damage,
+            spell.statusStats || {}
+          );
 
           set((state) => {
             const spellToReset = state.spells.find((s) => s.id === spell.id);
@@ -122,7 +126,7 @@ export const useSpellStore = create<SpellStore>()(
         state.equippedSpells.forEach((spellId) => {
           const spell = state.spells.find((s) => s.id === spellId);
           if (spell) {
-            spell.attackCost = spell.baseAttackCost + characterSpeed;
+            spell.attackCost = spell.baseAttackCost - characterSpeed;
           }
         });
       });

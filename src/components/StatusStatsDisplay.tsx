@@ -1,4 +1,4 @@
-import { StatusStats } from "../utils/combatCalculations";
+import { StatusStats } from "../types/status";
 
 interface StatusStatsDisplayProps {
   statusStats: StatusStats;

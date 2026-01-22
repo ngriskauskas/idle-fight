@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useItemStore } from "../itemStore";
-import { Item, ItemEffect } from "../items";
+import { useGameStore } from "../store/gameStore";
+import type { Item, ItemEffect, EquipSlot } from "../types/item";
+import { ICON_MAP } from "../data/iconMap";
+import { equipItem, unequipItem } from "../logic/itemActions";
 
 const RARITY_COLORS: Record<string, string> = {
   common: "bg-gray-400",
@@ -112,22 +114,21 @@ export function ItemPanel() {
   const [hoveredItem, setHoveredItem] = useState<Item | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  const items = useItemStore((state) => state.items);
-  const getEquippedInSlot = useItemStore((state) => state.getEquippedInSlot);
-  const equipItem = useItemStore((state) => state.equipItem);
-  const unequipItem = useItemStore((state) => state.unequipItem);
+  const character = useGameStore((state) => state.character);
+  const items = character.items;
 
   const handleMouseEnter = (
     item: Item,
-    e: React.MouseEvent<HTMLDivElement>
+    e: React.MouseEvent<HTMLDivElement>,
   ) => {
     setHoveredItem(item);
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPos({ x: rect.left - 208, y: rect.top });
   };
 
-  const EquipmentSlot = ({ slot }: { slot: string }) => {
-    const equippedItem = getEquippedInSlot(slot);
+  const EquipmentSlot = ({ slot }: { slot: EquipSlot }) => {
+    const equippedItem = character.equippedSlots[slot];
+
     const handleClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       unequipItem(slot);
@@ -150,7 +151,14 @@ export function ItemPanel() {
             } rounded flex flex-col items-center justify-center p-1 pointer-events-auto`}
             onPointerDown={handleClick}
           >
-            <div className="text-center text-2xl">{equippedItem.icon}</div>
+            <div className="text-center text-2xl">
+              {equippedItem.icon &&
+                ICON_MAP[equippedItem.icon] &&
+                (() => {
+                  const Icon = ICON_MAP[equippedItem.icon];
+                  return <Icon size={28} color="#1e293b" />;
+                })()}
+            </div>
             <div className="text-[0.5rem] font-bold text-gray-900">
               Lv {equippedItem.level}
             </div>
@@ -219,11 +227,8 @@ export function ItemPanel() {
           <div className="grid grid-cols-6 gap-2">
             {/* Create 120 slots (6x20 grid) */}
             {Array.from({ length: 120 }).map((_, slotIndex) => {
-              const item = items.find(
-                (i) =>
-                  !i.equipped &&
-                  items.filter((it) => !it.equipped).indexOf(i) === slotIndex
-              );
+              const unequippedItems = items.filter((i) => !i.equipped);
+              const item = unequippedItems[slotIndex];
               return (
                 <div
                   key={slotIndex}
@@ -235,13 +240,30 @@ export function ItemPanel() {
                         RARITY_COLORS[item.rarity]
                       } rounded flex flex-col items-center justify-center p-0.5 cursor-pointer hover:opacity-80`}
                       onClick={() => {
-                        equipItem(item.id);
+                        let targetSlot: EquipSlot = item.slot as EquipSlot;
+                        if (item.slot === "weapon") {
+                          targetSlot = character.equippedSlots.weapon1
+                            ? "weapon2"
+                            : "weapon1";
+                        } else if (item.slot === "ring") {
+                          targetSlot = character.equippedSlots.ring1
+                            ? "ring2"
+                            : "ring1";
+                        }
+                        equipItem(item.id, targetSlot);
                         setHoveredItem(null);
                       }}
                       onMouseEnter={(e) => handleMouseEnter(item, e)}
                       onMouseLeave={() => setHoveredItem(null)}
                     >
-                      <div className="text-lg">{item.icon}</div>
+                      <div className="text-lg">
+                        {item.icon &&
+                          ICON_MAP[item.icon] &&
+                          (() => {
+                            const Icon = ICON_MAP[item.icon];
+                            return <Icon size={22} color="#1e293b" />;
+                          })()}
+                      </div>
                       <div className="text-[0.5rem] font-bold text-gray-900">
                         Lv {item.level}
                       </div>

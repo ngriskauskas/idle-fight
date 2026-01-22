@@ -1,61 +1,38 @@
-import { useEffect } from "react";
-import { useCharacterStore } from "./characterStore";
-import { useEnemyStore } from "./enemyStore";
-import { useSpellStore } from "./spellStore";
 import { useGameLoop } from "./hooks/useGameLoop";
+import { useSaveSystem } from "./hooks/useSaveSystem";
 import { CharacterSection } from "./components/CharacterSection";
 import { EnemySection } from "./components/EnemySection";
 import { ProgressionBar } from "./components/ProgressionBar";
+import { PauseWidget } from "./components/PauseWidget";
+import { DebugPanel } from "./components/DebugPanel";
 import { Sidebar } from "./components/Sidebar";
-import { DEFAULT_SPELLS } from "./spells";
-import { loadGame, saveGame } from "./utils/saveSystem";
 
 function App() {
-  const { character } = useCharacterStore();
-  const { enemies } = useEnemyStore();
-  const setSpells = useSpellStore((state) => state.setSpells);
-  const recalculateEquippedSpellCosts = useSpellStore(
-    (state) => state.recalculateEquippedSpellCosts
-  );
-
-  useEffect(() => {
-    // Load game on startup
-    const loaded = loadGame();
-
-    // If no save was loaded, initialize with default spells
-    if (!loaded) {
-      setSpells(DEFAULT_SPELLS);
-      recalculateEquippedSpellCosts();
-    } else {
-      // Even if loaded, ensure spells are properly initialized
-      recalculateEquippedSpellCosts();
-    }
-  }, [setSpells, recalculateEquippedSpellCosts]);
-
-  useEffect(() => {
-    // Auto-save every 5 minutes
-    const autoSaveInterval = setInterval(() => {
-      saveGame();
-      localStorage.setItem("idle-fight-save-time", new Date().toISOString());
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(autoSaveInterval);
-  }, []);
-
+  useSaveSystem();
   useGameLoop();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col">
       <div className="flex-1 flex">
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4">
           <div className="max-w-5xl">
-            {/* Progression Display */}
-            <ProgressionBar />
+            {/* Debug Panel */}
+            <DebugPanel />
+
+            {/* Progression Display and Pause Widget */}
+            <div className="flex gap-4 items-start">
+              <div className="w-2/3">
+                <ProgressionBar />
+              </div>
+              <div className="w-1/3">
+                <PauseWidget />
+              </div>
+            </div>
 
             {/* Battle Arena */}
-            <div className="flex gap-4 mt-4">
-              <CharacterSection character={character} />
-              <EnemySection enemies={enemies} />
+            <div className="flex gap-4 mt-2">
+              <CharacterSection />
+              <EnemySection />
             </div>
           </div>
         </div>

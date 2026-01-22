@@ -1,30 +1,52 @@
-import { Spell } from "../spellTypes";
+import type { Spell } from "../types/spell";
 import { ProgressBar } from "./ProgressBar";
-import { useCharacterStore } from "../characterStore";
-import { StatusStats } from "../utils/combatCalculations";
+import { useGameStore } from "../store/gameStore";
+import type { Combatant } from "../types/combatant";
+import { ICON_MAP } from "../data/iconMap";
+
+const getSpellTypeColor = (
+  spellType: string,
+): { border: string; text: string } => {
+  const colors: Record<string, { border: string; text: string }> = {
+    physical: { border: "border-red-600", text: "text-red-400" },
+    magic: { border: "border-blue-600", text: "text-blue-400" },
+    aura: { border: "border-green-600", text: "text-green-400" },
+  };
+  return (
+    colors[spellType] || { border: "border-slate-600", text: "text-slate-400" }
+  );
+};
 
 interface SpellCardProps {
   spell: Spell;
   colorClass?: string;
-  combatantStats?: StatusStats;
+  caster?: Combatant;
 }
 
 export function SpellCard({
   spell,
   colorClass = "bg-gradient-to-r from-purple-500 to-purple-600",
-  combatantStats,
+  caster,
 }: SpellCardProps) {
-  const character = useCharacterStore((state) => state.character);
-  const statsToUse = combatantStats || character.statusStats;
-  const totalDamage = spell.damage + Math.floor(character.currentAttack);
+  const character = useGameStore((state) => state.character);
+  const actualCaster = caster || character;
+  const statsToUse = actualCaster.statusStats;
+  const totalDamage = spell.damage + Math.floor(actualCaster.currentAttack);
+  const typeColors = getSpellTypeColor(spell.spellType);
 
+  const Icon = ICON_MAP[spell.icon as keyof typeof ICON_MAP];
   return (
-    <div className="bg-slate-800 rounded p-3 border border-slate-700">
+    <div className={`bg-slate-800 rounded p-3 border-2 ${typeColors.border}`}>
       {/* Spell Header */}
       <div className="mb-2 flex items-center gap-2">
-        <span className="text-xl">{spell.icon}</span>
-        <div className="flex-1">
+        <span className="text-xl">
+          {Icon ? <Icon size={24} color="#fff" /> : null}
+        </span>
+        <div className="flex-1 flex items-center gap-2">
           <span className="font-semibold text-base">{spell.name}</span>
+          <span className={`text-xs px-2 py-1 rounded ${typeColors.text}`}>
+            {spell.spellType.charAt(0).toUpperCase() + spell.spellType.slice(1)}
+          </span>
         </div>
       </div>
 

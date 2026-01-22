@@ -1,46 +1,37 @@
 import { useEffect } from "react";
-import { useCharacterStore } from "../characterStore";
-import { useEnemyStore } from "../enemyStore";
-import { useSpellStore } from "../spellStore";
+import { useGameStore } from "../store/gameStore";
+import { tickSpells } from "../logic/combatantActions";
+import { tickRespawn } from "../logic/characterActions";
+import { tickStatusEffects } from "../logic/statusActions";
 
 export function useGameLoop() {
-  const {
-    character,
-    tickStatusEffects: charTickStatusEffects,
-    tickRespawnTimer,
-  } = useCharacterStore();
-  const { tickAndCastEnemySpells, tickStatusEffects: enemyTickStatusEffects } =
-    useEnemyStore();
-  const { tickAndCastSpells } = useSpellStore();
+  const character = useGameStore((state) => state.character);
+  const isPaused = useGameStore((state) => state.isPaused);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (character.currentRespawnTime === 0) {
-        tickAndCastSpells();
-        tickAndCastEnemySpells();
+      if (!isPaused && character.currentRespawnTime === 0) {
+        tickSpells();
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [tickAndCastSpells, tickAndCastEnemySpells, character.currentRespawnTime]);
+  }, [character.currentRespawnTime, isPaused]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (character.currentRespawnTime === 0) {
-        charTickStatusEffects();
-        enemyTickStatusEffects();
+      if (!isPaused && character.currentRespawnTime === 0) {
+        tickStatusEffects();
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [
-    charTickStatusEffects,
-    enemyTickStatusEffects,
-    character.currentRespawnTime,
-  ]);
+  }, [character.currentRespawnTime, isPaused]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      tickRespawnTimer();
+      if (!isPaused) {
+        tickRespawn();
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [tickRespawnTimer]);
+  }, [isPaused]);
 }

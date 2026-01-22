@@ -1,34 +1,51 @@
-import { CharacterStats } from "../characterStore";
-import { useSpellStore } from "../spellStore";
+import { useGameStore } from "../store/gameStore";
 import { ProgressBar } from "./ProgressBar";
 import { StatusEffectDisplay } from "./StatusEffectDisplay";
 import { CombatantStats } from "./CombatantStats";
 import { StatusStatsDisplay } from "./StatusStatsDisplay";
 import { SpellSection } from "./SpellSection";
 
-interface CharacterSectionProps {
-  character: CharacterStats;
-}
-
-export function CharacterSection({ character }: CharacterSectionProps) {
-  const equippedSpells = useSpellStore((state) => state.getEquippedSpells());
-
+export function CharacterSection() {
+  const character = useGameStore((state) => state.character);
   return (
     <div className="flex-initial w-96 bg-slate-700 rounded-lg p-6 border border-slate-600 self-start">
-      <h2 className="text-2xl font-bold mb-4 text-center">
-        Your Character{" "}
+      <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center gap-2">
+        <span>Your Character</span>
         <span className="text-blue-400">Lvl {character.level}</span>
       </h2>
 
+      {/* Experience Bar */}
+      <ProgressBar
+        current={character.experience}
+        max={character.experienceNeeded}
+        label="Exp"
+        colorClass="bg-gradient-to-r from-yellow-500 to-amber-600"
+        size="md"
+      />
+
       {/* Character Stats */}
-      <div className="mb-4">
+      <div className="mb-4 mt-4">
         <CombatantStats stats={character} />
       </div>
 
       {/* Status Stats */}
       <div className="mb-4">
-        <StatusStatsDisplay statusStats={character.statusStats} />
+        <StatusStatsDisplay
+          statusStats={character.statusStats}
+          showNone={false}
+        />
       </div>
+
+      {/* Shield Bar */}
+      {character.maxShield > 0 && (
+        <ProgressBar
+          current={character.shield}
+          max={character.maxShield}
+          label="Shield"
+          colorClass="bg-gradient-to-r from-blue-400 to-blue-500"
+          size="lg"
+        />
+      )}
 
       {/* Health Bar */}
       <ProgressBar
@@ -58,17 +75,8 @@ export function CharacterSection({ character }: CharacterSectionProps) {
         </div>
       )}
 
-      {/* Experience Bar */}
-      <ProgressBar
-        current={character.experience}
-        max={character.experienceNeeded}
-        label="Exp"
-        colorClass="bg-gradient-to-r from-yellow-500 to-amber-600"
-        size="md"
-      />
-
-      {/* Equipped Spells */}
-      <SpellSection spells={equippedSpells} />
+      {/* Unlocked Spells */}
+      <SpellSection spells={character.spells} />
 
       {/* Status Effects */}
       <StatusEffectDisplay effects={character.statusEffects} />

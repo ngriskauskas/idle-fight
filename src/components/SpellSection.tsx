@@ -1,17 +1,17 @@
-import { Spell } from "../spellTypes";
+import type { Spell } from "../types/spell";
 import { SpellCard } from "./SpellCard";
-import { StatusStats } from "../utils/combatCalculations";
+import type { Combatant } from "../types/combatant";
 
 interface SpellSectionProps {
   spells: Spell[];
   colorClass?: string;
-  combatantStats?: StatusStats;
+  caster?: Combatant;
 }
 
 export function SpellSection({
   spells,
   colorClass = "bg-gradient-to-r from-purple-500 to-purple-600",
-  combatantStats,
+  caster,
 }: SpellSectionProps) {
   return (
     <div className="mt-6">
@@ -26,7 +26,7 @@ export function SpellSection({
               key={spell.id}
               spell={spell}
               colorClass={colorClass}
-              combatantStats={combatantStats}
+              caster={caster}
             />
           ))}
         </div>

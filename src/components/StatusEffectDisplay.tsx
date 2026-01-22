@@ -1,4 +1,4 @@
-import { StatusEffect } from "../utils/combatCalculations";
+import { StatusEffect } from "../old/utils/combatCalculations";
 
 interface StatusEffectDisplayProps {
   effects: StatusEffect[];

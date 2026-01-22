@@ -12,6 +12,16 @@ export function SaveUI() {
     if (savedTime) {
       setLastSave(new Date(savedTime));
     }
+
+    // Update display every second to reflect elapsed time
+    const updateInterval = setInterval(() => {
+      const updatedTime = localStorage.getItem("idle-fight-save-time");
+      if (updatedTime) {
+        setLastSave(new Date(updatedTime));
+      }
+    }, 1000);
+
+    return () => clearInterval(updateInterval);
   }, []);
 
   const handleManualSave = () => {

@@ -1,0 +1,81 @@
+import type { ItemTemplate } from "../types/item";
+
+export const ITEM_TEMPLATES: ItemTemplate[] = [
+  {
+    id: "iron-sword",
+    name: "Iron Sword",
+    icon: "broadsword",
+    slot: "weapon",
+    itemEffectTypes: ["flatDamage"],
+  },
+  {
+    id: "iron-plate",
+    name: "Iron Plate",
+    icon: "chestArmor",
+    slot: "body",
+    itemEffectTypes: ["flatDefense"],
+  },
+  {
+    id: "iron-helm",
+    name: "Iron Helm",
+    icon: "visoredHelm",
+    slot: "helmet",
+    itemEffectTypes: ["flatDefense"],
+  },
+  {
+    id: "iron-boots",
+    name: "Iron Boots",
+    icon: "boots",
+    slot: "boots",
+    itemEffectTypes: ["flatDefense"],
+  },
+  {
+    id: "ring-of-power",
+    name: "Ring of Power",
+    icon: "ring",
+    slot: "ring",
+    itemEffectTypes: ["flatDamage"],
+  },
+  {
+    id: "iron-leggings",
+    name: "Iron Leggings",
+    icon: "legArmor",
+    slot: "legs",
+    itemEffectTypes: ["flatDefense"],
+  },
+  {
+    id: "amulet-of-health",
+    name: "Amulet of Health",
+    icon: "gemNecklace",
+    slot: "amulet",
+    itemEffectTypes: ["flatHealth"],
+  },
+  {
+    id: "arcane-plate",
+    name: "Arcane Plate",
+    icon: "chestArmor",
+    slot: "body",
+    itemEffectTypes: ["flatShield", "shieldRegen"],
+  },
+  {
+    id: "arcane-helm",
+    name: "Arcane Helm",
+    icon: "hornedHelm",
+    slot: "helmet",
+    itemEffectTypes: ["flatShield", "shieldRegen"],
+  },
+  {
+    id: "arcane-boots",
+    name: "Arcane Boots",
+    icon: "sonicShoes",
+    slot: "boots",
+    itemEffectTypes: ["flatShield", "shieldRegen"],
+  },
+  {
+    id: "arcane-leggings",
+    name: "Arcane Leggings",
+    icon: "legArmor",
+    slot: "legs",
+    itemEffectTypes: ["flatShield", "shieldRegen"],
+  },
+];

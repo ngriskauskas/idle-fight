@@ -1,24 +1,12 @@
-import { Enemy, useEnemyStore } from "../enemyStore";
 import { EnemyCard } from "./EnemyCard";
 import { useState, useEffect } from "react";
+import { useGameStore } from "../store/gameStore";
 
-interface EnemySectionProps {
-  enemies: Enemy[];
-}
-
-export function EnemySection({ enemies }: EnemySectionProps) {
+export function EnemySection() {
+  const enemies = useGameStore((state) => state.enemies);
   const [showDeath, setShowDeath] = useState<string | null>(null);
-  const enemyKilled = useEnemyStore((state) => state.enemyKilled);
 
-  useEffect(() => {
-    if (enemyKilled) {
-      setShowDeath(enemyKilled.name);
-      setTimeout(() => {
-        setShowDeath(null);
-        useEnemyStore.setState({ enemyKilled: null });
-      }, 1000);
-    }
-  }, [enemyKilled]);
+  useEffect(() => {}, []);
 
   return (
     <div className="flex-1 relative">

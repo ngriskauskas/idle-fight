@@ -4,8 +4,15 @@ export type EffectType =
   | "health"
   | "shield"
   | "speed"
+  | "mana"
+  | "manaRegen"
+  | "manaCost"
+  | "critChance"
+  | "critMultiplier"
   | "healthRegen"
   | "shieldRegen"
+  | "healthLeech"
+  | "manaLeech"
   | "itemDropChance"
   | "poison"
   | "bleed"
@@ -13,9 +20,10 @@ export type EffectType =
   | "ice"
   | "lightning";
 
+export type EffectValue = "percentage" | "flat";
+
 export interface Effect {
   type: EffectType;
   value: number;
+  valueType: EffectValue;
 }
-
-export type ActiveEffectMap = Record<EffectType, Effect>;

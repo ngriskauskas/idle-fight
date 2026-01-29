@@ -1,20 +1,26 @@
+import { AuraEffect } from "./aura";
+import { CombatStat } from "./combatStat";
+
 export interface Spell {
   id: string;
   name: string;
   description: string;
-  damage: number;
-  baseAttackCost: number;
-  attackCost: number;
-  currentAttackCost: number;
+  damage: CombatStat;
+  attackCost: CombatStat;
   spellType: "physical" | "magic" | "aura";
+  auraEffect?: AuraEffect;
   unlocked: boolean;
   unlockCost: number;
+  critChance: CombatStat;
+  critMultiplier: CombatStat;
+  manaCost: CombatStat;
+  isAoe: boolean;
   statusStats: Partial<{
-    poison: number;
-    bleed: number;
-    fire: number;
-    ice: number;
-    lightning: number;
+    poison: CombatStat;
+    bleed: CombatStat;
+    fire: CombatStat;
+    ice: CombatStat;
+    lightning: CombatStat;
   }>;
   icon: string;
 }

@@ -1,5 +1,7 @@
 export interface Attack {
   damage: number;
+  isCrit: boolean;
+  isAoe: boolean;
   statusStats: Partial<{
     poison: number;
     bleed: number;

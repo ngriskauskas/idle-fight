@@ -1,3 +1,5 @@
+import type { Effect } from "./effect";
+
 export interface Talent {
   id: string;
   name: string;
@@ -9,4 +11,5 @@ export interface Talent {
   cost: number;
   tier: number;
   category: "attack" | "defense" | "speed" | "status" | "utility";
+  effects: Effect[];
 }

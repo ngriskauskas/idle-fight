@@ -1,27 +1,37 @@
 import type { StatusEffect, StatusStats } from "./status";
 import type { AuraEffect } from "./aura";
 import type { Spell } from "./spell";
+import type { ActiveEffect } from "./activeEffect";
+import type { CombatStat } from "./combatStat";
+import { EffectType } from "./effect";
 
 export interface Combatant {
   id: string;
   name: string;
   icon: string;
   isMainCharacter: boolean;
-  health: number;
-  maxHealth: number;
-  shield: number;
-  maxShield: number;
-  attack: number;
-  currentAttack: number;
-  defense: number;
-  currentDefense: number;
-  speed: number;
+  health: CombatStat;
+  maxHealth: CombatStat;
+  shield: CombatStat;
+  maxShield: CombatStat;
+  mana: CombatStat;
+  maxMana: CombatStat;
+  manaRegen: CombatStat;
+  attack: CombatStat;
+  defense: CombatStat;
+  speed: CombatStat;
   level: number;
-  healthRegen: number;
-  shieldRegen: number;
+  healthRegen: CombatStat;
+  shieldRegen: CombatStat;
+  healthLeech: CombatStat;
+  manaLeech: CombatStat;
+  manaCost: CombatStat;
+  critChance: CombatStat;
+  critMultiplier: CombatStat;
 
   statusEffects: StatusEffect[];
   statusStats: StatusStats;
   auraEffects: AuraEffect[];
   spells: Spell[];
+  appliedEffects: Record<EffectType, ActiveEffect[]>;
 }

@@ -1,18 +1,37 @@
+import { useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { ProgressBar } from "./ProgressBar";
 import { StatusEffectDisplay } from "./StatusEffectDisplay";
-import { CombatantStats } from "./CombatantStats";
-import { StatusStatsDisplay } from "./StatusStatsDisplay";
+import { AuraEffectDisplay } from "./AuraEffectDisplay";
 import { SpellSection } from "./SpellSection";
+import { DetailedStatsModal } from "./DetailedStatsModal";
+import { Combatant } from "../types";
+import { CombatLogAnimation } from "./CombatLogAnimation";
 
 export function CharacterSection() {
   const character = useGameStore((state) => state.character);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+
   return (
-    <div className="flex-initial w-96 bg-slate-700 rounded-lg p-6 border border-slate-600 self-start">
+    <div className="relative flex-initial w-96 bg-slate-700 rounded-lg p-6 border border-slate-600 self-start">
+      <CombatLogAnimation combatant={character as Combatant} />
       <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center gap-2">
         <span>Your Character</span>
         <span className="text-blue-400">Lvl {character.level}</span>
+        <button
+          onClick={() => setShowStatsModal(true)}
+          className="ml-2 px-2 py-1 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-cyan-400 transition"
+          title="View detailed stats"
+        >
+          Stats
+        </button>
       </h2>
+
+      <DetailedStatsModal
+        combatant={character as Combatant}
+        isOpen={showStatsModal}
+        onClose={() => setShowStatsModal(false)}
+      />
 
       {/* Experience Bar */}
       <ProgressBar
@@ -23,24 +42,11 @@ export function CharacterSection() {
         size="md"
       />
 
-      {/* Character Stats */}
-      <div className="mb-4 mt-4">
-        <CombatantStats stats={character} />
-      </div>
-
-      {/* Status Stats */}
-      <div className="mb-4">
-        <StatusStatsDisplay
-          statusStats={character.statusStats}
-          showNone={false}
-        />
-      </div>
-
       {/* Shield Bar */}
-      {character.maxShield > 0 && (
+      {character.maxShield.total > 0 && (
         <ProgressBar
-          current={character.shield}
-          max={character.maxShield}
+          current={character.shield.current}
+          max={character.maxShield.total}
           label="Shield"
           colorClass="bg-gradient-to-r from-blue-400 to-blue-500"
           size="lg"
@@ -49,10 +55,19 @@ export function CharacterSection() {
 
       {/* Health Bar */}
       <ProgressBar
-        current={character.health}
-        max={character.maxHealth}
+        current={character.health.current}
+        max={character.maxHealth.total}
         label="Health"
         colorClass="bg-gradient-to-r from-green-500 to-green-600"
+        size="lg"
+      />
+
+      {/* Mana Bar */}
+      <ProgressBar
+        current={character.mana.current}
+        max={character.maxMana.total}
+        label="Mana"
+        colorClass="bg-gradient-to-r from-blue-500 to-blue-600"
         size="lg"
       />
 
@@ -77,6 +92,9 @@ export function CharacterSection() {
 
       {/* Unlocked Spells */}
       <SpellSection spells={character.spells} />
+
+      {/* Aura Effects */}
+      <AuraEffectDisplay auras={character.auraEffects} />
 
       {/* Status Effects */}
       <StatusEffectDisplay effects={character.statusEffects} />

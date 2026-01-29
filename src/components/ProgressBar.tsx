@@ -1,3 +1,5 @@
+import { formatNumber } from "../utils/format";
+
 interface ProgressBarProps {
   current: number;
   max: number;
@@ -52,7 +54,7 @@ export function ProgressBar({
               <span
                 className={`font-bold text-white drop-shadow ${textSizeClass}`}
               >
-                {Math.floor(current)} / {max}
+                {formatNumber(current)} / {formatNumber(max)}
               </span>
             </div>
           </div>

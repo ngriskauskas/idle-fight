@@ -1,6 +1,7 @@
 import { useGameStore } from "../store/gameStore";
 import { ICON_MAP } from "../data/iconMap";
 import type { Log, LogType, DamageLog, KillLog, ItemDropLog } from "../types";
+import { formatNumber } from "../utils/format";
 
 const LOG_TYPES: LogType[] = ["damage", "kill", "itemDrop"];
 
@@ -40,24 +41,27 @@ function DamageLogEntry({ log }: { log: DamageLog }) {
           </div>
           <div className="text-gray-500 text-xs">{timestamp}</div>
         </div>
+        {log.attack.isCrit && (
+          <span className="text-red-400 font-bold text-sm">Crit</span>
+        )}
       </div>
 
       <div className="bg-gray-800 rounded p-2 mb-2 text-xs space-y-1 border border-gray-600">
         <div className="flex justify-between">
           <span className="text-gray-400">Spell Damage:</span>
           <span className="text-blue-400 font-semibold">
-            {log.attack.damage}
+            {formatNumber(log.attack.damage)}
           </span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Defense:</span>
           <span className="text-purple-400 font-semibold">
-            {log.target.currentDefense || 0}
+            {formatNumber(log.target.defense.total)}
           </span>
         </div>
         <div className="border-t border-gray-600 pt-1 mt-1 flex justify-between font-semibold">
           <span className="text-yellow-400">Final Damage:</span>
-          <span className="text-yellow-400">{log.damage}</span>
+          <span className="text-yellow-400">{formatNumber(log.damage)}</span>
         </div>
       </div>
 
@@ -67,7 +71,7 @@ function DamageLogEntry({ log }: { log: DamageLog }) {
             <div className="font-semibold mb-1">Status Effects:</div>
             {Object.entries(log.attack.statusStats).map(([status, stacks]) => (
               <div key={status} className="text-purple-300">
-                {status}: +{stacks}
+                {status.charAt(0).toUpperCase() + status.slice(1)}: +{stacks}
               </div>
             ))}
           </div>
@@ -158,15 +162,11 @@ export function LogPanel() {
   const logs = useGameStore((state) => state.logs);
   const selectedTypes = useGameStore((state) => state.selectedLogTypes);
 
-  const filteredLogs = logs.filter((log) => selectedTypes.has(log.type));
+  const filteredLogs = logs.filter((log) => selectedTypes[log.type]);
 
   const toggleType = (type: LogType) => {
     useGameStore.setState((state) => {
-      if (state.selectedLogTypes.has(type)) {
-        state.selectedLogTypes.delete(type);
-      } else {
-        state.selectedLogTypes.add(type);
-      }
+      state.selectedLogTypes[type] = !state.selectedLogTypes[type];
     });
   };
 
@@ -178,7 +178,7 @@ export function LogPanel() {
             key={type}
             onClick={() => toggleType(type)}
             className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
-              selectedTypes.has(type)
+              selectedTypes[type]
                 ? "bg-blue-600 text-white"
                 : "bg-gray-600 text-gray-300 hover:bg-gray-500"
             }`}

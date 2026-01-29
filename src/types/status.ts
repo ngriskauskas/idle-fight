@@ -1,9 +1,11 @@
+import { CombatStat } from "./combatStat";
+
 export interface StatusStats {
-  poison: number;
-  bleed: number;
-  fire: number;
-  ice: number;
-  lightning: number;
+  poison: CombatStat;
+  bleed: CombatStat;
+  fire: CombatStat;
+  ice: CombatStat;
+  lightning: CombatStat;
 }
 
 export interface StatusEffect {

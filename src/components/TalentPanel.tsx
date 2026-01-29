@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useGameStore } from "../store/gameStore";
-import { talentActions } from "../logic/talentActions";
+import { unlockTalent } from "../logic/talentActions";
+import { EffectsDisplay } from "./EffectsDisplay";
 
 interface TooltipPos {
   x: number;
@@ -113,7 +114,7 @@ export function TalentPanel() {
                       <button
                         onClick={() => {
                           if (!isTierLocked) {
-                            talentActions.unlockTalent(talent.id);
+                            unlockTalent(talent.id);
                           }
                         }}
                         disabled={
@@ -172,6 +173,15 @@ export function TalentPanel() {
             <div className="text-xs text-gray-300 mt-1">
               {getHoveredTalent()?.description}
             </div>
+            {getHoveredTalent()?.effects &&
+              getHoveredTalent()!.effects.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-slate-600">
+                  <EffectsDisplay
+                    effects={getHoveredTalent()!.effects}
+                    size="sm"
+                  />
+                </div>
+              )}
           </div>
         </div>
       )}

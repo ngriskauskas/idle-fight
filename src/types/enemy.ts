@@ -7,6 +7,8 @@ export interface Enemy extends Combatant {
   xpReward: number;
   xpMultiplier: number;
   itemDropRateBonus: number;
+  deathTimer: number;
+  isDead: boolean;
 }
 
 export interface EnemyPreset {
@@ -19,6 +21,9 @@ export interface EnemyPreset {
   baseShield?: number;
   baseShieldRegen?: number;
   baseHealthRegen?: number;
+  baseMana?: number;
+  baseManaCost?: number;
+  baseManaRegen?: number;
   spells: Spell[];
   xpMultiplier?: number;
   itemDropRateBonus?: number;

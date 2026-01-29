@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { useGameStore } from "../store/gameStore";
-import { tickSpells } from "../logic/combatantActions";
+import { tickRegen, tickSpells } from "../logic/combatantActions";
 import { tickRespawn } from "../logic/characterActions";
 import { tickStatusEffects } from "../logic/statusActions";
+import { tickAuraEffects } from "../logic/auraActions";
+import { tickEnemyDeathTimers } from "../logic/enemyActions";
 
 export function useGameLoop() {
   const character = useGameStore((state) => state.character);
@@ -12,6 +14,7 @@ export function useGameLoop() {
     const interval = setInterval(() => {
       if (!isPaused && character.currentRespawnTime === 0) {
         tickSpells();
+        tickEnemyDeathTimers();
       }
     }, 100);
     return () => clearInterval(interval);
@@ -21,6 +24,8 @@ export function useGameLoop() {
     const interval = setInterval(() => {
       if (!isPaused && character.currentRespawnTime === 0) {
         tickStatusEffects();
+        tickAuraEffects();
+        tickRegen();
       }
     }, 1000);
     return () => clearInterval(interval);

@@ -9,3 +9,5 @@ export * from "./item";
 export * from "./talent";
 export * from "./effect";
 export * from "./log";
+export * from "./activeEffect";
+export * from "./combatStat";

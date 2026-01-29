@@ -1,6 +1,7 @@
 import { useGameStore } from "../store/gameStore";
-import type { DamageLog, KillLog, ItemDropLog, Item } from "../types";
+import type { DamageLog, KillLog, ItemDropLog, Item, Log } from "../types";
 import { Combatant, Spell, Attack } from "../types";
+import { AnimationOccurrence } from "../types/animation";
 
 function generateLogId(state: any): string {
   const id = `log_${Date.now()}_${state.logIdCounter || 0}`;
@@ -10,26 +11,31 @@ function generateLogId(state: any): string {
 
 export function logDamage(
   source: Combatant,
-  target: Combatant,
+  targets: Combatant[],
   spell: Spell,
   damage: number,
   attack: Attack,
 ): void {
   useGameStore.setState((state) => {
-    const log: DamageLog = {
-      id: generateLogId(state),
-      timestamp: Date.now(),
-      type: "damage",
-      source,
-      target,
-      spell,
-      damage,
-      attack: {
-        damage: attack.damage,
-        statusStats: { ...attack.statusStats },
-      },
-    };
-    state.logs.push(log);
+    targets.forEach((target) => {
+      const log: DamageLog = {
+        id: generateLogId(state),
+        timestamp: Date.now(),
+        type: "damage",
+        source,
+        target,
+        spell,
+        damage,
+        attack: {
+          isAoe: attack.isAoe,
+          damage: attack.damage,
+          isCrit: attack.isCrit,
+          statusStats: { ...attack.statusStats },
+        },
+      };
+      state.logs.push(log);
+      state.animationQueue.push({ type: "damage", log });
+    });
     if (state.logs.length > 25) {
       state.logs = state.logs.slice(-25);
     }
@@ -46,6 +52,7 @@ export function logKill(target: Combatant, xpGained: number): void {
       xpGained,
     };
     state.logs.push(log);
+    state.animationQueue.push({ type: "kill", log });
     if (state.logs.length > 25) {
       state.logs = state.logs.slice(-25);
     }

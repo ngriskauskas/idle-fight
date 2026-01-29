@@ -1,6 +1,8 @@
 import { useGameStore } from "../store/gameStore";
 import { resetEnemies } from "./enemyActions";
 import { logKill } from "./logActions";
+import { resetProgression } from "./progressionActions";
+import { removeEffect } from "./effectActions";
 
 export function levelUpCharacter(): void {
   useGameStore.setState((state) => {
@@ -30,16 +32,29 @@ export function killCharacter(): void {
   useGameStore.setState((state) => {
     state.character.currentRespawnTime = state.character.respawnTime;
   });
+  resetProgression();
   resetEnemies();
 }
 
 export function respawnCharacter(): void {
+  const auraEffects = useGameStore.getState().character.auraEffects;
+  const character = useGameStore.getState().character;
+  auraEffects.forEach((aura) => {
+    aura.effects.forEach((effect) =>
+      removeEffect(character, effect, `aura-${aura.id}-effect${effect.type}`),
+    );
+  });
+
   useGameStore.setState((state) => {
-    state.character.health = state.character.maxHealth;
+    state.character.health.current = state.character.maxHealth.total;
     state.character.currentRespawnTime = 0;
+    state.character.mana.current = state.character.maxMana.total;
     state.character.spells.forEach((spell) => {
-      spell.currentAttackCost = 0;
+      spell.attackCost.current = 0;
     });
+    state.character.statusEffects = [];
+    state.character.auraEffects = [];
+    state.character.speed.current = state.character.speed.total;
   });
 }
 

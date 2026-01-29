@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useGameStore } from "../store/gameStore";
-import type { Item, ItemEffect, EquipSlot } from "../types/item";
+import type { Item, EquipSlot } from "../types/item";
 import { ICON_MAP } from "../data/iconMap";
 import { equipItem, unequipItem } from "../logic/itemActions";
+import { EffectsDisplay } from "./EffectsDisplay";
 
 const RARITY_COLORS: Record<string, string> = {
   common: "bg-gray-400",
@@ -10,6 +11,7 @@ const RARITY_COLORS: Record<string, string> = {
   rare: "bg-blue-400",
   epic: "bg-purple-400",
   legendary: "bg-yellow-400",
+  unique: "bg-orange-500",
 };
 
 const SLOT_DISPLAY: Record<string, string> = {
@@ -25,36 +27,6 @@ const SLOT_DISPLAY: Record<string, string> = {
 };
 
 function ItemTooltip({ item }: { item: Item }) {
-  const formatEffect = (effectType: string, value: number) => {
-    const isPercent = effectType.startsWith("percent");
-    const baseValue = value > 0 ? `+${value}` : `${value}`;
-    return isPercent ? `${baseValue} %` : baseValue;
-  };
-
-  const formatEffectLabel = (effectType: string) => {
-    if (effectType === "itemDropChance") return "Item Drop Chance";
-    return effectType
-      .replace(/^flat/, "")
-      .replace(/^percent/, "")
-      .replace(/([A-Z])/g, " $1")
-      .trim();
-  };
-
-  const getStatusEffectColor = (effectType: string) => {
-    const colors: Record<string, string> = {
-      poison: "text-purple-400",
-      bleed: "text-red-400",
-      fire: "text-orange-400",
-      ice: "text-blue-400",
-      lightning: "text-yellow-400",
-    };
-    return colors[effectType] || "text-gray-400";
-  };
-
-  const isStatusEffect = (effectType: string) => {
-    return ["poison", "bleed", "fire", "ice", "lightning"].includes(effectType);
-  };
-
   return (
     <div className="bg-gray-900 border-2 border-gray-600 rounded p-3 w-56 text-sm">
       <h4 className="font-bold text-white mb-1">
@@ -66,23 +38,14 @@ function ItemTooltip({ item }: { item: Item }) {
       </div>
 
       {/* Main Effects */}
-      <div className="mb-3">
-        <div className="text-xs font-bold text-gray-300 mb-1">Main Effects</div>
-        {item.mainEffects.map((effect: ItemEffect, idx: number) => {
-          const [effectType, value] = Object.entries(effect)[0];
-          const colorClass = isStatusEffect(effectType)
-            ? getStatusEffectColor(effectType)
-            : "text-gray-400";
-          const label = isStatusEffect(effectType)
-            ? effectType.charAt(0).toUpperCase() + effectType.slice(1)
-            : formatEffectLabel(effectType);
-          return (
-            <div key={idx} className={`text-xs ${colorClass}`}>
-              {label}: {formatEffect(effectType, value as number)}
-            </div>
-          );
-        })}
-      </div>
+      {item.mainEffects.length > 0 && (
+        <div className="mb-3">
+          <div className="text-xs font-bold text-gray-300 mb-1">
+            Main Effects
+          </div>
+          <EffectsDisplay effects={item.mainEffects} size="sm" />
+        </div>
+      )}
 
       {/* Secondary Effects */}
       {item.secondaryEffects.length > 0 && (
@@ -90,20 +53,7 @@ function ItemTooltip({ item }: { item: Item }) {
           <div className="text-xs font-bold text-gray-300 mb-1">
             Secondary Effects
           </div>
-          {item.secondaryEffects.map((effect: ItemEffect, idx: number) => {
-            const [effectType, value] = Object.entries(effect)[0];
-            const colorClass = isStatusEffect(effectType)
-              ? getStatusEffectColor(effectType)
-              : "text-gray-500";
-            const label = isStatusEffect(effectType)
-              ? effectType.charAt(0).toUpperCase() + effectType.slice(1)
-              : formatEffectLabel(effectType);
-            return (
-              <div key={idx} className={`text-xs ${colorClass}`}>
-                {label}: {formatEffect(effectType, value as number)}
-              </div>
-            );
-          })}
+          <EffectsDisplay effects={item.secondaryEffects} size="sm" />
         </div>
       )}
     </div>

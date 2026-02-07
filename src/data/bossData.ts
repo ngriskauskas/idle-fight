@@ -1,17 +1,14 @@
 import type { Spell } from "../types/spell";
 import {
-  SLASH,
-  REND,
-  EXECUTE,
-  POISON_STAB,
-  FIREBALL,
   ICE_SPIKE,
   LIGHTNING_BOLT,
-  METEOR,
+  FIREBALL,
   INFERNO,
   FROSTBOLT,
   CHAIN_LIGHTNING,
-} from "./spellData";
+  METEOR,
+} from "./spells/magicSpells";
+import { SLASH, REND, POISON_STAB } from "./spells/physSpells";
 
 export interface BossPreset {
   id: string;

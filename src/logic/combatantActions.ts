@@ -41,48 +41,6 @@ export function tickSpells(): void {
   state.enemies.filter((e) => !e.isDead).forEach(tickCombatant);
 }
 
-export function recalcCharacterSpellSpeeds(): void {
-  useGameStore.setState((state) => {
-    state.character.spells.forEach((spell) => {
-      spell.attackCost.total = Math.max(
-        1,
-        spell.attackCost.base - state.character.speed.current,
-      );
-    });
-  });
-}
-
-export function recalcCharacterSpellCosts(): void {
-  useGameStore.setState((state) => {
-    state.character.spells.forEach((spell) => {
-      spell.manaCost.total =
-        spell.manaCost.base + state.character.manaCost.total;
-    });
-  });
-}
-
-export function recalcEnemySpellSpeeds(): void {
-  useGameStore.setState((state) => {
-    state.enemies.forEach((enemy) => {
-      enemy.spells.forEach((spell) => {
-        spell.attackCost.total = Math.max(
-          1,
-          spell.attackCost.base - enemy.speed.current,
-        );
-      });
-    });
-  });
-}
-
-export function recalcEnemySpellCosts(): void {
-  useGameStore.setState((state) => {
-    state.enemies.forEach((enemy) => {
-      enemy.spells.forEach((spell) => {
-        spell.manaCost.total = spell.manaCost.base + enemy.manaCost.total;
-      });
-    });
-  });
-}
 export function tickRegen(): void {
   const tickCombatant = (combatant: Combatant) => {
     useGameStore.setState((state) => {
@@ -90,26 +48,20 @@ export function tickRegen(): void {
         ? state.character
         : state.enemies.find((e) => e.id === combatant.id)!;
 
-      if (target.health.current < target.maxHealth.total) {
-        target.health.current = Math.min(
-          target.health.current + target.healthRegen.total,
-          target.maxHealth.total,
-        );
-      }
+      target.health.current = Math.min(
+        target.health.current + target.healthRegen.total,
+        target.maxHealth.total,
+      );
 
-      if (target.shield.current < target.maxShield.total) {
-        target.shield.current = Math.min(
-          target.shield.current + target.shieldRegen.total,
-          target.maxShield.total,
-        );
-      }
+      target.shield.current = Math.min(
+        target.shield.current + target.shieldRegen.total,
+        target.maxShield.total,
+      );
 
-      if (target.mana.current < target.maxMana.total) {
-        target.mana.current = Math.min(
-          target.mana.current + target.manaRegen.total,
-          target.maxMana.total,
-        );
-      }
+      target.mana.current = Math.min(
+        target.mana.current + target.manaRegen.total,
+        target.maxMana.total,
+      );
     });
   };
 

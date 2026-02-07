@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useGameStore } from "../store/gameStore";
 import { unlockTalent } from "../logic/talentActions";
 import { EffectsDisplay } from "./EffectsDisplay";
+import { TriggersDisplay } from "./TriggersDisplay";
 
 interface TooltipPos {
   x: number;
@@ -166,13 +167,19 @@ export function TalentPanel() {
             top: `${tooltipPos.y - 30}px`,
           }}
         >
-          <div className="bg-slate-900 border-2 border-slate-600 rounded p-3 w-48 shadow-lg">
+          <div className="bg-slate-900 border-2 border-slate-600 rounded p-3 w-64 shadow-lg">
             <div className="font-bold text-sm text-white">
               {getHoveredTalent()?.name}
             </div>
-            <div className="text-xs text-gray-300 mt-1">
-              {getHoveredTalent()?.description}
-            </div>
+            {getHoveredTalent()?.triggers &&
+              getHoveredTalent()!.triggers!.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-slate-700">
+                  <TriggersDisplay
+                    triggers={getHoveredTalent()!.triggers!}
+                    size="sm"
+                  />
+                </div>
+              )}
             {getHoveredTalent()?.effects &&
               getHoveredTalent()!.effects.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-slate-600">

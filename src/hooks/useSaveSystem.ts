@@ -2,10 +2,6 @@ import { useEffect } from "react";
 import { loadGame, saveGame } from "../utils/saveSystem";
 import { spawnNewEnemies } from "../logic/enemyActions";
 import { useGameStore } from "../store/gameStore";
-import {
-  recalcCharacterSpellSpeeds,
-  recalcEnemySpellSpeeds,
-} from "../logic/combatantActions";
 
 const AUTO_SAVE_INTERVAL = 5 * 60 * 1000;
 
@@ -17,8 +13,6 @@ export function useSaveSystem() {
       const enemies = useGameStore.getState().enemies;
       if (enemies.length === 0) {
         spawnNewEnemies();
-        recalcEnemySpellSpeeds();
-        recalcCharacterSpellSpeeds();
       }
     }
   }, []);

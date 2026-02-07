@@ -8,7 +8,6 @@ export interface Enemy extends Combatant {
   xpMultiplier: number;
   itemDropRateBonus: number;
   deathTimer: number;
-  isDead: boolean;
 }
 
 export interface EnemyPreset {

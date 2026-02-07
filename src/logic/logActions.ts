@@ -1,7 +1,6 @@
 import { useGameStore } from "../store/gameStore";
-import type { DamageLog, KillLog, ItemDropLog, Item, Log } from "../types";
+import type { DamageLog, KillLog, ItemDropLog, Item } from "../types";
 import { Combatant, Spell, Attack } from "../types";
-import { AnimationOccurrence } from "../types/animation";
 
 function generateLogId(state: any): string {
   const id = `log_${Date.now()}_${state.logIdCounter || 0}`;

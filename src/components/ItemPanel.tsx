@@ -4,6 +4,7 @@ import type { Item, EquipSlot } from "../types/item";
 import { ICON_MAP } from "../data/iconMap";
 import { equipItem, unequipItem } from "../logic/itemActions";
 import { EffectsDisplay } from "./EffectsDisplay";
+import { TriggersDisplay } from "./TriggersDisplay";
 
 const RARITY_COLORS: Record<string, string> = {
   common: "bg-gray-400",
@@ -36,6 +37,14 @@ function ItemTooltip({ item }: { item: Item }) {
       <div className="text-xs text-gray-400 mb-3">
         Slot: {item.slot} • Rarity: {item.rarity}
       </div>
+
+      {/* Main Effects */}
+      {item.triggers && item.triggers.length > 0 && (
+        <div className="mb-3">
+          <div className="text-xs font-bold text-gray-300 mb-1">Triggers</div>
+          <TriggersDisplay triggers={item.triggers} size="sm" />
+        </div>
+      )}
 
       {/* Main Effects */}
       {item.mainEffects.length > 0 && (

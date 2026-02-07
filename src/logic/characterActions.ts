@@ -31,6 +31,7 @@ export function killCharacter(): void {
   logKill(useGameStore.getState().character, 0);
   useGameStore.setState((state) => {
     state.character.currentRespawnTime = state.character.respawnTime;
+    state.character.isDead = true;
   });
   resetProgression();
   resetEnemies();
@@ -47,6 +48,7 @@ export function respawnCharacter(): void {
 
   useGameStore.setState((state) => {
     state.character.health.current = state.character.maxHealth.total;
+    state.character.shield.current = state.character.maxShield.total;
     state.character.currentRespawnTime = 0;
     state.character.mana.current = state.character.maxMana.total;
     state.character.spells.forEach((spell) => {
@@ -55,6 +57,7 @@ export function respawnCharacter(): void {
     state.character.statusEffects = [];
     state.character.auraEffects = [];
     state.character.speed.current = state.character.speed.total;
+    state.character.isDead = false;
   });
 }
 

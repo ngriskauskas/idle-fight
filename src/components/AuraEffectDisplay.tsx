@@ -1,6 +1,7 @@
 import type { AuraEffect } from "../types/aura";
 import { ICON_MAP } from "../data/iconMap";
 import { EffectsDisplay } from "./EffectsDisplay";
+import { TriggersDisplay } from "./TriggersDisplay";
 
 interface AuraEffectDisplayProps {
   auras: AuraEffect[];
@@ -53,6 +54,16 @@ export function AuraEffectDisplay({
             {/* Effects */}
             {aura.effects.length > 0 && (
               <EffectsDisplay effects={aura.effects} size="sm" />
+            )}
+            {aura.scaling && (
+              <div className="text-xs text-blue-300 mt-1 align-right">
+                Scaling: +{aura.scaling}x per stack ({aura.stacks})
+              </div>
+            )}
+            {aura.tickTriggers && aura.tickTriggers.length > 0 && (
+              <div className="mt-1">
+                <TriggersDisplay triggers={aura.tickTriggers} size="sm" />
+              </div>
             )}
           </div>
         );

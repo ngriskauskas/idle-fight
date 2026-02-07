@@ -69,8 +69,10 @@ export function EffectsDisplay({ effects, size = "md" }: EffectsDisplayProps) {
           effect.type === "itemDropChance" ||
           effect.type === "critChance";
 
+        const isSet = effect.priority === "set";
+
         const displayValue = isPercentage ? `${effect.value}%` : effect.value;
-        const prefix = effect.value < 0 ? "" : "+";
+        const prefix = isSet ? "=" : effect.value < 0 ? "" : "+";
 
         return (
           <div

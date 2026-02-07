@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { Character, Enemy, Spell, Talent, Log } from "../types";
-import { DEFAULT_SPELLS, STRIKE } from "../data/spellData";
-import { DEFAULT_TALENTS } from "../data/talentData";
+import { DEFAULT_SPELLS } from "../data/spells";
+import { DEFAULT_TALENTS } from "../data/talents/index";
 import { AnimationOccurrence } from "../types/animation";
+import { STRIKE } from "../data/spells/physSpells";
 
 export interface GameState {
   character: Character;
@@ -37,6 +38,7 @@ const initialCharacter: Character = {
   id: "player",
   name: "Player",
   icon: "sword",
+  isDead: false,
   isMainCharacter: true,
   health: { base: 25, total: 25, current: 25 },
   maxHealth: { base: 25, total: 25, current: 25 },
@@ -62,9 +64,9 @@ const initialCharacter: Character = {
   },
   auraEffects: [],
   experience: 0,
-  experienceNeeded: 10,
+  experienceNeeded: 5,
   itemDropChance: { base: 0.1, total: 0.1, current: 0.1 },
-  respawnTime: 5,
+  respawnTime: 4,
   currentRespawnTime: 0,
   items: [],
   equippedSlots: {
@@ -82,7 +84,7 @@ const initialCharacter: Character = {
   spellCount: 1,
   mana: { base: 50, total: 50, current: 50 },
   maxMana: { base: 50, total: 50, current: 50 },
-  manaRegen: { base: 1, total: 1, current: 1 },
+  manaRegen: { base: 0, total: 0, current: 0 },
   manaCost: { base: 0, total: 0, current: 0 },
   appliedEffects: {
     damage: [],
@@ -105,6 +107,18 @@ const initialCharacter: Character = {
     fire: [],
     ice: [],
     lightning: [],
+  },
+  triggers: {
+    onHit: [],
+    onCrit: [],
+    onKill: [],
+    onTakeDamage: [],
+    onEnemySpawn: [],
+    onLowHealth: [],
+    onFullMana: [],
+    onTakeAttack: [],
+    tickTrigger: [],
+    onDeath: [],
   },
 };
 

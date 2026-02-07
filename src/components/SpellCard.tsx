@@ -5,6 +5,7 @@ import type { Combatant } from "../types/combatant";
 import { ICON_MAP } from "../data/iconMap";
 import { EffectsDisplay } from "./EffectsDisplay";
 import { formatNumber } from "../utils/format";
+import { TriggersDisplay } from "./TriggersDisplay";
 
 const getSpellTypeColor = (
   spellType: string,
@@ -78,6 +79,12 @@ export function SpellCard({
             </div>
             <div className="border-t border-slate-700 pt-2">
               <EffectsDisplay effects={spell.auraEffect.effects} size="sm" />
+            </div>
+            <div>
+              <TriggersDisplay
+                triggers={spell.auraEffect.tickTriggers || []}
+                size="sm"
+              />
             </div>
           </>
         ) : (

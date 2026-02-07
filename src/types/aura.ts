@@ -1,4 +1,5 @@
 import type { Effect } from "./effect";
+import { Trigger } from "./triggers";
 
 export interface AuraEffect {
   id: string;
@@ -9,4 +10,7 @@ export interface AuraEffect {
   currentTime: number;
   totalTime: number;
   stacks: number;
+  scaling?: number;
+  isFragile?: boolean;
+  tickTriggers?: Trigger[];
 }

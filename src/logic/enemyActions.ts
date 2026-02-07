@@ -6,14 +6,10 @@ import { progressEnemy, getScaleMulti } from "./progressionActions";
 import { gainXp } from "./characterActions";
 import { dropItem } from "./itemActions";
 import { logKill } from "./logActions";
-import {
-  recalcEnemySpellCosts,
-  recalcEnemySpellSpeeds,
-} from "./combatantActions";
+import { callTriggers } from "./triggerActions";
 
 let enemyIdCounter = 1;
 
-// Map of enemy number (1-9) to max spawn count
 const ENEMY_SPAWN_LIMITS: Record<number, number> = {
   1: 1, // Enemy 1: max 1
   2: 1, // Enemies 2-4: max 2
@@ -146,6 +142,18 @@ export function createEnemy(
       ice: [],
       lightning: [],
     },
+    triggers: {
+      onHit: [],
+      onCrit: [],
+      onKill: [],
+      onTakeDamage: [],
+      onEnemySpawn: [],
+      onLowHealth: [],
+      onFullMana: [],
+      onTakeAttack: [],
+      tickTrigger: [],
+      onDeath: [],
+    },
   };
 }
 
@@ -162,8 +170,6 @@ export function spawnNewEnemies() {
     useGameStore.setState((state) => {
       state.enemies.push(newEnemy);
     });
-    recalcEnemySpellCosts();
-    recalcEnemySpellSpeeds();
     return;
   }
 
@@ -189,14 +195,20 @@ export function spawnNewEnemies() {
         state.enemies.push(enemy);
       }
     }
+
+    state.enemies.forEach((enemy) => {
+      enemy.triggers.onDeath = state.character.triggers.onDeath;
+    });
   });
-  recalcEnemySpellCosts();
-  recalcEnemySpellSpeeds();
+
+  callTriggers("onEnemySpawn", useGameStore.getState().character);
 }
 
 export function killEnemy(enemyIndex: number): void {
   const state = useGameStore.getState();
   const enemy = state.enemies[enemyIndex];
+
+  callTriggers("onDeath", enemy);
   const xpReward = Math.ceil(enemy.xpReward * enemy.xpMultiplier);
   const enemyLevel = enemy.level;
 
@@ -214,6 +226,8 @@ export function killEnemy(enemyIndex: number): void {
     state.enemies[enemyIndex].deathTimer = 1;
     state.enemies[enemyIndex].isDead = true;
   });
+
+  callTriggers("onKill", state.character);
 }
 
 export function removeEnemy(enemyIndex: number): void {

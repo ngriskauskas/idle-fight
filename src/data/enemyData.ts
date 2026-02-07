@@ -1,22 +1,16 @@
 import { EnemyPreset } from "../types";
+import { LIFESTEAL, CURSE, ARCANE_BOOST, FORTITUDE } from "./spells/auras";
 import {
-  SLASH,
-  REND,
-  POISON_STAB,
   ICE_SPIKE,
   LIGHTNING_BOLT,
-  METEOR,
-  CHAIN_LIGHTNING,
-  LIFESTEAL,
-  CURSE,
   ARCANE_MISSILE,
-  ARCANE_BOOST,
   FIREBALL,
   FROSTBOLT,
-  FORTITUDE,
-  WHIRLWIND,
+  CHAIN_LIGHTNING,
   INFERNO,
-} from "./spellData";
+  METEOR,
+} from "./spells/magicSpells";
+import { SLASH, POISON_STAB, REND, WHIRLWIND } from "./spells/physSpells";
 
 export const DEFAULT_ENEMIES: EnemyPreset[] = [
   // Wave 1: Vermin & Mischief

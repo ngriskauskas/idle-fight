@@ -1,31 +1,25 @@
 import type { Attack, Combatant, StatusEffectType } from "../types";
 import { useGameStore } from "../store/gameStore";
-import {
-  recalcCharacterSpellSpeeds,
-  recalcEnemySpellSpeeds,
-} from "./combatantActions";
-import { killCharacter } from "./characterActions";
-import { killEnemy } from "./enemyActions";
 
 function poisonEffect(target: Combatant, stacks: number): void {
-  target.health.current = Math.max(0, target.health.current - stacks);
+  target.health.current = target.health.current - stacks;
 }
 
 function bleedEffect(target: Combatant, stacks: number): void {
-  target.health.current = Math.max(0, target.health.current - stacks);
-  target.defense.current = Math.max(0, target.defense.total - stacks);
+  target.health.current = target.health.current - stacks;
+  target.defense.current = target.defense.current - stacks;
 }
 
 function fireEffect(target: Combatant, stacks: number): void {
-  target.health.current = Math.max(0, target.health.current - stacks);
+  target.health.current = target.health.current - stacks;
 }
 
 function iceEffect(target: Combatant, stacks: number): void {
-  target.speed.current = Math.max(0, target.speed.total - stacks);
+  target.speed.current = target.speed.total - stacks;
 }
 
 function lightningEffect(target: Combatant, stacks: number): void {
-  target.health.current = Math.max(0, target.health.current - stacks);
+  target.health.current = target.health.current - stacks;
 }
 
 const statusEffectMap: Record<
@@ -80,22 +74,4 @@ export function tickStatusEffects(): void {
     processCombatant(state.character);
     state.enemies.filter((e) => !e.isDead).forEach(processCombatant);
   });
-  recalcCharacterSpellSpeeds();
-  recalcEnemySpellSpeeds();
-
-  // Check for deaths
-  const state = useGameStore.getState();
-  if (
-    state.character.health.current <= 0 &&
-    state.character.currentRespawnTime === 0
-  ) {
-    killCharacter();
-  }
-  state.enemies
-    .filter((e) => !e.isDead)
-    .forEach((enemy, index) => {
-      if (enemy.health.current <= 0) {
-        killEnemy(index);
-      }
-    });
 }

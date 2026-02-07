@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGameStore } from "../store/gameStore";
-import type { Combatant, DamageLog, Enemy, KillLog } from "../types";
+import type { Combatant, DamageLog, KillLog } from "../types";
 import { formatNumber } from "../utils/format";
 import { ICON_MAP } from "../data/iconMap";
 
@@ -86,7 +86,7 @@ export function CombatLogAnimation({ combatant }: CombatLogAnimationProps) {
     if (!events.length) return;
     const timeout = setTimeout(() => {
       setEvents([]);
-    }, 1000);
+    }, 800);
     return () => clearTimeout(timeout);
   }, [events]);
 

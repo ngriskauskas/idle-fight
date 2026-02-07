@@ -5,7 +5,6 @@ export interface Spell {
   id: string;
   name: string;
   description: string;
-  damage: CombatStat;
   attackCost: CombatStat;
   spellType: "physical" | "magic" | "aura";
   auraEffect?: AuraEffect;
@@ -14,7 +13,9 @@ export interface Spell {
   critChance: CombatStat;
   critMultiplier: CombatStat;
   manaCost: CombatStat;
+  damage: CombatStat;
   isAoe: boolean;
+  isSelfTargeted?: boolean;
   statusStats: Partial<{
     poison: CombatStat;
     bleed: CombatStat;

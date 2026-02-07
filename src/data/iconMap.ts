@@ -8,7 +8,6 @@ import {
   GiChestArmor,
   GiBoots,
   GiRing,
-  GiLegArmor,
   GiGemNecklace,
   GiVisoredHelm,
   GiHornedHelm,

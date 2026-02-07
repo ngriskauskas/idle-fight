@@ -1,8 +1,4 @@
 import { useGameStore } from "../store/gameStore";
-import {
-  recalcCharacterSpellSpeeds,
-  recalcCharacterSpellCosts,
-} from "./combatantActions";
 import { removeAura } from "./auraActions";
 
 export const spellActions = {
@@ -45,8 +41,6 @@ export const spellActions = {
     if (auraIdToRemove) {
       removeAura(auraIdToRemove);
     }
-    recalcCharacterSpellSpeeds();
-    recalcCharacterSpellCosts();
   },
 
   unequipSpell: (spellId: string) => {

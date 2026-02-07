@@ -6,7 +6,6 @@ import type {
   EffectType,
   Combatant,
 } from "../types";
-import { recalcCharacterSpellSpeeds } from "./combatantActions";
 
 type EffectApplier = () => void;
 
@@ -15,13 +14,17 @@ export function recalculateCombatStatTotal(
   stat: CombatStat,
   effectType: EffectType,
 ): number {
-  const activeEffects = combatant.appliedEffects[effectType] || [];
+  const activeEffects =
+    combatant.appliedEffects[effectType].filter(
+      (x) => x.effect.priority === "normal",
+    ) || [];
 
   let total = stat.base;
 
   const flatEffects = activeEffects.filter(
     (ae) => ae.effect.valueType === "flat",
   );
+
   flatEffects.forEach((ae) => {
     // For percentage-based stats, divide by 100 to convert from percentage to decimal
     const isPercentageStat =
@@ -47,6 +50,13 @@ export function recalculateCombatStatTotal(
         : Math.trunc((total * totalPercentChange) / 100);
   }
 
+  const setMin = combatant.appliedEffects[effectType]
+    .filter((ae) => ae.effect.priority === "set")
+    .sort((a, b) => b.effect.value - a.effect.value)[0];
+
+  if (setMin) {
+    total = setMin.effect.value;
+  }
   return total;
 }
 
@@ -135,21 +145,20 @@ export function getEffectMap(
           target.speed.current = newTotal;
         }
       });
-      if (combatant.isMainCharacter) {
-        recalcCharacterSpellSpeeds();
-      }
     },
     healthRegen: () => {
       useGameStore.setState((state) => {
         const target = combatant.isMainCharacter
           ? state.character
           : state.enemies.find((e) => e.id === combatant.id);
+
         if (target) {
-          target.healthRegen.total = recalculateCombatStatTotal(
+          const val = recalculateCombatStatTotal(
             target,
             target.healthRegen,
             "healthRegen",
           );
+          target.healthRegen.total = val;
         }
       });
     },
@@ -379,30 +388,22 @@ export function addEffect(
       ? state.character
       : state.enemies.find((e) => e.id === combatant.id);
 
-    if (target) {
-      if (!target.appliedEffects[effect.type]) {
-        target.appliedEffects[effect.type] = [];
-      }
+    if (!target) return;
 
-      const activeEffect: ActiveEffect = {
-        id: effectId,
-        type: effectSourceType,
-        name: effectName,
-        effect,
-      };
-      if (
-        !target.appliedEffects[effect.type].some((ae) => ae.id === effectId)
-      ) {
-        target.appliedEffects[effect.type].push(activeEffect);
-      }
+    const activeEffect: ActiveEffect = {
+      id: effectId,
+      type: effectSourceType,
+      name: effectName,
+      effect,
+    };
+    if (!target.appliedEffects[effect.type].some((ae) => ae.id === effectId)) {
+      target.appliedEffects[effect.type].push(activeEffect);
     }
   });
 
   const effectMap = getEffectMap(combatant);
-  const applier = effectMap[effect.type];
-  if (applier) {
-    applier();
-  }
+  const applier = effectMap[effect.type]!;
+  applier();
 }
 
 export function removeEffect(
@@ -423,8 +424,6 @@ export function removeEffect(
   });
 
   const effectMap = getEffectMap(combatant);
-  const applier = effectMap[effect.type];
-  if (applier) {
-    applier();
-  }
+  const applier = effectMap[effect.type]!;
+  applier();
 }

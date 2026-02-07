@@ -1,5 +1,6 @@
 import { useGameStore } from "../store/gameStore";
 import { addEffect, removeEffect } from "./effectActions";
+import { addTrigger } from "./triggerActions";
 
 export function unlockTalent(talentId: string) {
   let wasUnlocked = false;
@@ -24,11 +25,21 @@ export function unlockTalent(talentId: string) {
 
       addEffect(
         character,
-        { ...effect, value: effect.value * talent.level },
+        {
+          ...effect,
+          value:
+            effect.priority === "set"
+              ? effect.value
+              : effect.value * talent.level,
+        },
         `talent-${talent.id}`,
         talent.name,
         "talent",
       );
+    });
+
+    talent.triggers?.forEach((trigger) => {
+      addTrigger(trigger, character);
     });
   }
 }

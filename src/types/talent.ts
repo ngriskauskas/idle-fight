@@ -1,9 +1,9 @@
 import type { Effect } from "./effect";
+import { Trigger } from "./triggers";
 
 export interface Talent {
   id: string;
   name: string;
-  description: string;
   icon?: string;
   unlocked: boolean;
   level: number;
@@ -12,4 +12,5 @@ export interface Talent {
   tier: number;
   category: "attack" | "defense" | "speed" | "status" | "utility";
   effects: Effect[];
+  triggers?: Trigger[];
 }

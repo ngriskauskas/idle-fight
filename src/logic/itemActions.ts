@@ -6,12 +6,14 @@ import type {
   ItemSlot,
   EffectType,
   Effect,
+  EffectPriority,
 } from "../types";
 import { ITEM_TEMPLATES } from "../data/itemData";
 import { UNIQUE_ITEMS } from "../data/uniqueItemData";
 import { logItemDrop } from "./logActions";
 import { addEffect, removeEffect } from "./effectActions";
 import { getScaleMulti } from "./progressionActions";
+import { addTrigger, removeTrigger } from "./triggerActions";
 
 const RARITY_WEIGHTS: Record<ItemRarity, number> = {
   common: 0.6,
@@ -162,6 +164,7 @@ function generateItem(level: number): Item {
       type: baseEffect.type,
       value: finalValue,
       valueType: baseEffect.valueType,
+      priority: "normal" as EffectPriority,
     };
   });
 
@@ -194,6 +197,7 @@ function generateItem(level: number): Item {
         ? Math.max(1, Math.ceil((scaledValue * 10) / 2))
         : Math.max(1, Math.ceil(scaledValue / 2)),
       valueType: isPercentage ? "percentage" : "flat",
+      priority: "normal" as EffectPriority,
     } as Effect);
   }
 
@@ -205,6 +209,7 @@ function generateItem(level: number): Item {
     equipped: false,
     mainEffects,
     secondaryEffects,
+    triggers: randomTemplate.triggers,
   };
 
   return item;
@@ -240,6 +245,10 @@ export function equipItem(itemId: string, slot: EquipSlot): void {
     existingItem.secondaryEffects.forEach((effect) =>
       removeEffect(character, effect, `item-${existingItem.id}-secondary`),
     );
+
+    existingItem.triggers?.forEach((trigger) => {
+      removeTrigger(trigger, character);
+    });
   }
 
   useGameStore.setState((state) => {
@@ -266,6 +275,9 @@ export function equipItem(itemId: string, slot: EquipSlot): void {
       "item",
     ),
   );
+  item.triggers?.forEach((trigger) => {
+    addTrigger(trigger, character);
+  });
 }
 
 export function unequipItem(slot: EquipSlot): void {
@@ -280,6 +292,9 @@ export function unequipItem(slot: EquipSlot): void {
     item.secondaryEffects.forEach((effect) =>
       removeEffect(character, effect, `item-${item.id}-secondary`),
     );
+    item.triggers?.forEach((trigger) => {
+      removeTrigger(trigger, character);
+    });
   }
 
   useGameStore.setState((state) => {

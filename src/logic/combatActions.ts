@@ -1,21 +1,33 @@
 import type { Attack, Combatant, Spell } from "../types";
 import { useGameStore } from "../store/gameStore";
-import { killCharacter } from "./characterActions";
-import { killEnemy } from "./enemyActions";
 import { applyStatusEffects } from "./statusActions";
-import { applyAuraEffect } from "./auraActions";
+import { applyAuraEffect, removeFragileAuras } from "./auraActions";
 import { logDamage } from "./logActions";
+import { callTriggers } from "./triggerActions";
+
+function castAuraSpell(spell: Spell, caster: Combatant): void {
+  const targets = caster.isMainCharacter
+    ? spell.isSelfTargeted
+      ? [useGameStore.getState().character]
+      : useGameStore.getState().enemies.filter((e) => !e.isDead)
+    : spell.isSelfTargeted
+      ? [useGameStore.getState().enemies.find((e) => e.id === caster.id)!]
+      : [useGameStore.getState().character];
+
+  console.log(
+    "Applying aura to targets:",
+    spell.name,
+    targets.map((t) => t.name),
+  );
+
+  targets.forEach((target) => {
+    applyAuraEffect(target, spell.auraEffect!);
+  });
+}
 
 export function castSpell(spell: Spell, caster: Combatant): void {
-  // Handle aura spells
-  if (spell.spellType === "aura" && spell.auraEffect) {
-    const target = caster.isMainCharacter
-      ? useGameStore.getState().character
-      : useGameStore.getState().enemies.find((e) => e.id === caster.id);
-
-    if (target) {
-      applyAuraEffect(target, spell.auraEffect);
-    }
+  if (spell.spellType === "aura") {
+    castAuraSpell(spell, caster);
   } else {
     const attack = createAttack(caster, spell);
 
@@ -26,27 +38,29 @@ export function castSpell(spell: Spell, caster: Combatant): void {
     }
   }
 
-  // Deduct mana (same for both aura and attack spells)
   useGameStore.setState((state) => {
     if (caster.isMainCharacter) {
       state.character.mana.current = Math.max(
         0,
         state.character.mana.current -
-          (spell.manaCost.total + state.character.manaCost.total),
+          (spell.manaCost.total +
+            (spell.spellType === "magic" ? state.character.manaCost.total : 0)),
       );
     } else {
       const enemy = state.enemies.find((e) => e.id === caster.id);
       if (enemy) {
         enemy.mana.current = Math.max(
           0,
-          enemy.mana.current - spell.manaCost.total,
+          enemy.mana.current -
+            (spell.manaCost.total +
+              (spell.spellType === "magic" ? enemy.manaCost.total : 0)),
         );
       }
     }
   });
 }
 
-function createAttack(caster: Combatant, spell: Spell): Attack {
+export function createAttack(caster: Combatant, spell: Spell): Attack {
   const totalCritChance = caster.critChance.total + spell.critChance.total;
   const isCrit = Math.random() < totalCritChance;
 
@@ -108,11 +122,6 @@ export function takeCharacterDamage(damageTaken: number): void {
       state.character.health.current - healthDamage,
     );
   });
-  const character = useGameStore.getState().character;
-
-  if (character.health.current <= 0 && character.currentRespawnTime === 0) {
-    killCharacter();
-  }
 }
 
 export function takeEnemyDamage(enemyIndex: number, damageTaken: number): void {
@@ -123,15 +132,9 @@ export function takeEnemyDamage(enemyIndex: number, damageTaken: number): void {
     enemy.shield.current = Math.max(0, enemy.shield.current - shieldDamage);
     enemy.health.current = Math.max(0, enemy.health.current - healthDamage);
   });
-
-  const enemy = useGameStore.getState().enemies[enemyIndex];
-
-  if (enemy.health.current <= 0 && !enemy.isDead) {
-    killEnemy(enemyIndex);
-  }
 }
 
-function attackCharacter(
+export function attackCharacter(
   attack: Attack,
   caster: Combatant,
   spell: Spell,
@@ -160,9 +163,18 @@ function attackCharacter(
       );
     }
   });
+  callTriggers("onHit", caster);
+  callTriggers("onTakeAttack", state.character);
+  if (attack.isCrit) {
+    callTriggers("onCrit", caster);
+  }
 }
 
-function attackEnemies(attack: Attack, caster: Combatant, spell: Spell): void {
+export function attackEnemies(
+  attack: Attack,
+  caster: Combatant,
+  spell: Spell,
+): void {
   const state = useGameStore.getState();
   const aliveEnemies = state.enemies.filter((e) => !e.isDead);
 
@@ -180,6 +192,7 @@ function attackEnemies(attack: Attack, caster: Combatant, spell: Spell): void {
     takeEnemyDamage(enemyIndex, damageTaken);
     applyStatusEffects(attack, enemy);
     totalDamageTaken += damageTaken;
+    callTriggers("onTakeAttack", enemy);
   });
 
   // Apply leech to the character caster
@@ -199,4 +212,9 @@ function attackEnemies(attack: Attack, caster: Combatant, spell: Spell): void {
       state.character.mana.current + manaLeechAmount,
     );
   });
+
+  callTriggers("onHit", caster);
+  if (attack.isCrit) {
+    callTriggers("onCrit", caster);
+  }
 }

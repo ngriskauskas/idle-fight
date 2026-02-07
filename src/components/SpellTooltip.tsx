@@ -1,4 +1,5 @@
 import type { Spell } from "../types/spell";
+import { TriggersDisplay } from "./TriggersDisplay";
 
 const getSpellTypeColor = (spellType: string): string => {
   const colors: Record<string, string> = {
@@ -126,6 +127,13 @@ export function SpellTooltip({ spell }: { spell: Spell }) {
                 : <span className="font-bold">{value.base}</span>
               </div>
             ) : null,
+          )}
+        {spell.auraEffect?.tickTriggers &&
+          spell.auraEffect.tickTriggers.length > 0 && (
+            <TriggersDisplay
+              triggers={spell.auraEffect.tickTriggers}
+              size="sm"
+            />
           )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { Effect } from "./effect";
+import { Trigger } from "./triggers";
 
 export type EquipSlot =
   | "body"
@@ -34,6 +35,7 @@ export interface ItemTemplate {
   icon: string;
   slot: ItemSlot;
   itemEffects: Effect[];
+  triggers?: Trigger[];
 }
 
 export interface Item extends ItemTemplate {

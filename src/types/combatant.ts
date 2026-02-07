@@ -4,11 +4,13 @@ import type { Spell } from "./spell";
 import type { ActiveEffect } from "./activeEffect";
 import type { CombatStat } from "./combatStat";
 import { EffectType } from "./effect";
+import { Trigger, TriggerType } from "./triggers";
 
 export interface Combatant {
   id: string;
   name: string;
   icon: string;
+  isDead: boolean;
   isMainCharacter: boolean;
   health: CombatStat;
   maxHealth: CombatStat;
@@ -34,4 +36,5 @@ export interface Combatant {
   auraEffects: AuraEffect[];
   spells: Spell[];
   appliedEffects: Record<EffectType, ActiveEffect[]>;
+  triggers: Record<TriggerType, Trigger[]>;
 }

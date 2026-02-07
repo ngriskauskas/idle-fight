@@ -2,6 +2,7 @@ import type { Character, Combatant, CombatStat, EffectType } from "../types";
 import { ICON_MAP } from "../data/iconMap";
 import { Tooltip } from "./Tooltip";
 import { formatNumber, formatPercent } from "../utils/format";
+import { TriggersDisplay } from "./TriggersDisplay";
 
 interface StatLineProps {
   label: string;
@@ -49,9 +50,12 @@ function StatLine({
       {flatEffects.map((ae) => {
         const isPercentageStat =
           effectType === "critChance" || effectType === "itemDropChance";
-        const displayValue = isPercentageStat
-          ? `+${(ae.effect.value / 100) * 100}%`
-          : `+${format(ae.effect.value)}`;
+        const displayValue =
+          ae.effect.priority === "set"
+            ? `=${ae.effect.value}`
+            : isPercentageStat
+              ? `${ae.effect.value > 0 ? "+" : ""}${(ae.effect.value / 100) * 100}%`
+              : `${ae.effect.value > 0 ? "+" : ""}${format(ae.effect.value)}`;
         return (
           <div key={ae.id} className="flex justify-between">
             <span className={getTypeColor(ae.type)}>
@@ -80,12 +84,6 @@ function StatLine({
             <span>Total</span>
             <span className="font-mono">{format(stat.total)}</span>
           </div>
-          {stat.current !== stat.total && (
-            <div className="flex justify-between text-white pt-1">
-              <span>Current</span>
-              <span className="font-mono">{format(stat.current)}</span>
-            </div>
-          )}
         </>
       }
     </div>
@@ -282,7 +280,7 @@ export function DetailedStatsModal({
             <h3 className="text-lg font-bold text-red-400 mb-3">
               Status Effects
             </h3>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-5 gap-2 mb-3">
               <StatLine
                 label="Poison"
                 stat={combatant.statusStats.poison}
@@ -321,6 +319,18 @@ export function DetailedStatsModal({
             </div>
           </div>
         </div>
+
+        {/* Section to display all triggers for a combatant */}
+        {combatant.triggers &&
+          Object.values(combatant.triggers).flat().length > 0 && (
+            <div>
+              <h3 className="text-lg font-bold text-blue-400 mb-2">Triggers</h3>
+              <TriggersDisplay
+                triggers={Object.values(combatant.triggers || {}).flat()}
+                size="md"
+              />
+            </div>
+          )}
       </div>
     </div>
   );

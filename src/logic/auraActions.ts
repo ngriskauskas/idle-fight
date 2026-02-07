@@ -1,16 +1,16 @@
 import { useGameStore } from "../store/gameStore";
 import type { AuraEffect, Combatant, Effect } from "../types";
+import { Trigger } from "../types/triggers";
 import { addEffect, removeEffect } from "./effectActions";
-import {
-  recalcCharacterSpellSpeeds,
-  recalcEnemySpellSpeeds,
-} from "./combatantActions";
+import { callTriggerAction } from "./triggerActions";
 
 export function applyAuraEffect(
   target: Combatant,
   auraEffect: AuraEffect,
 ): void {
-  let effectsToAdd: typeof auraEffect.effects = [];
+  let effectsToAdd: Effect[] = [];
+  let effectsToRemove: Effect[] = [];
+  let stacks = 0;
 
   useGameStore.setState((state) => {
     const stateTarget = target.isMainCharacter
@@ -23,23 +23,35 @@ export function applyAuraEffect(
 
     if (existingAura) {
       existingAura.stacks += auraEffect.stacks;
-      existingAura.currentTime =
-        existingAura.currentTime + existingAura.totalTime / 2;
+      stacks = existingAura.stacks;
+      effectsToAdd = auraEffect.effects;
+      effectsToRemove = existingAura.effects.map((e) => ({ ...e }));
     } else {
       const newAura: AuraEffect = {
         ...auraEffect,
         currentTime: auraEffect.totalTime,
       };
       stateTarget.auraEffects.push(newAura);
+      stacks = newAura.stacks;
       effectsToAdd = newAura.effects;
     }
   });
 
+  const multiplier = auraEffect.scaling ? stacks * auraEffect.scaling : 1;
+
+  effectsToRemove.forEach((effect) =>
+    removeEffect(
+      target,
+      effect,
+      `aura-${auraEffect.id}-effect${effect.type}-${effect.valueType}`,
+    ),
+  );
+
   effectsToAdd.forEach((effect) =>
     addEffect(
       target,
-      effect,
-      `aura-${auraEffect.id}-effect${effect.type}`,
+      { ...effect, value: effect.value * multiplier },
+      `aura-${auraEffect.id}-effect${effect.type}-${effect.valueType}`,
       auraEffect.name,
       "aura",
     ),
@@ -53,24 +65,56 @@ export function tickAuraEffects(): void {
     combatant: Combatant;
   }[] = [];
 
+  const effectsToAdd: {
+    effect: Effect;
+    stacks: number;
+    auraEffect: AuraEffect;
+    combatant: Combatant;
+  }[] = [];
+
+  const auraTickTriggers: { trigger: Trigger; combatant: Combatant }[] = [];
+
   useGameStore.setState((state) => {
     const processCombatant = (target: Combatant) => {
       for (const aura of target.auraEffects) {
         aura.currentTime -= 1;
+
+        if (aura.tickTriggers) {
+          auraTickTriggers.push(
+            ...aura.tickTriggers.map((trigger) => ({
+              trigger: { ...trigger },
+              combatant: { ...target },
+            })),
+          );
+        }
       }
 
       const expiredAuras = target.auraEffects.filter((a) => a.currentTime <= 0);
       expiredAuras.forEach((aura) => {
+        aura.stacks -= 1;
         aura.effects.forEach((effect) => {
+          effect.value =
+            effect.value * (aura.scaling ? aura.stacks * aura.scaling : 1);
           effectsToRemove.push({
             effect: { ...effect },
             auraId: aura.id,
             combatant: { ...target },
           });
+          effectsToAdd.push({
+            effect: { ...effect },
+            stacks: aura.stacks,
+            auraEffect: { ...aura },
+            combatant: { ...target },
+          });
         });
+        if (aura.stacks > 0) {
+          aura.currentTime = aura.totalTime;
+        }
       });
 
-      target.auraEffects = target.auraEffects.filter((a) => a.currentTime > 0);
+      target.auraEffects = target.auraEffects.filter(
+        (a) => a.currentTime > 0 && a.stacks > 0,
+      );
     };
 
     processCombatant(state.character);
@@ -79,11 +123,42 @@ export function tickAuraEffects(): void {
 
   effectsToRemove.forEach(({ effect, auraId, combatant }) => {
     if (combatant)
-      removeEffect(combatant, effect, `aura-${auraId}-effect${effect.type}`);
+      removeEffect(
+        combatant,
+        effect,
+        `aura-${auraId}-effect${effect.type}-${effect.valueType}`,
+      );
   });
 
-  recalcCharacterSpellSpeeds();
-  recalcEnemySpellSpeeds();
+  effectsToAdd.forEach(({ effect, stacks, auraEffect, combatant }) =>
+    addEffect(
+      combatant,
+      {
+        ...effect,
+        value:
+          effect.value * (auraEffect.scaling ? stacks * auraEffect.scaling : 1),
+      },
+      `aura-${auraEffect.id}-effect${effect.type}-${effect.valueType}`,
+      auraEffect.name,
+      "aura",
+    ),
+  );
+
+  auraTickTriggers.forEach(({ trigger, combatant }) => {
+    callTriggerAction(trigger, combatant);
+  });
+}
+
+export function removeFragileAuras(target: Combatant): void {
+  const state = useGameStore.getState();
+  const stateTarget = target.isMainCharacter
+    ? state.character
+    : state.enemies.find((e) => e.id === target.id)!;
+
+  const fragileAuras = stateTarget.auraEffects.filter((a) => a.isFragile);
+  fragileAuras.forEach((aura) => {
+    removeAura(aura.id);
+  });
 }
 
 export function removeAura(auraId: string): void {
@@ -107,7 +182,10 @@ export function removeAura(auraId: string): void {
 
   const character = useGameStore.getState().character;
   effectsToRemove.forEach(({ effect, auraId }) =>
-    removeEffect(character, effect, `aura-${auraId}-effect${effect.type}`),
+    removeEffect(
+      character,
+      effect,
+      `aura-${auraId}-effect${effect.type}-${effect.valueType}`,
+    ),
   );
-  recalcCharacterSpellSpeeds();
 }

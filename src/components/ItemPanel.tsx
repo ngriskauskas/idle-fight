@@ -5,6 +5,7 @@ import { ICON_MAP } from "../data/iconMap";
 import { equipItem, unequipItem } from "../logic/itemActions";
 import { EffectsDisplay } from "./EffectsDisplay";
 import { TriggersDisplay } from "./TriggersDisplay";
+import { Character } from "../types";
 
 const RARITY_COLORS: Record<string, string> = {
   common: "bg-gray-400",
@@ -31,8 +32,7 @@ function ItemTooltip({ item }: { item: Item }) {
   return (
     <div className="bg-gray-900 border-2 border-gray-600 rounded p-3 w-56 text-sm">
       <h4 className="font-bold text-white mb-1">
-        {item.name}{" "}
-        <span className="text-gray-400 text-xs">Lv {item.level}</span>
+        {item.name} <span className="text-gray-400 text-xs">Lv {item.level}</span>
       </h4>
       <div className="text-xs text-gray-400 mb-3">
         Slot: {item.slot} • Rarity: {item.rarity}
@@ -49,9 +49,7 @@ function ItemTooltip({ item }: { item: Item }) {
       {/* Main Effects */}
       {item.mainEffects.length > 0 && (
         <div className="mb-3">
-          <div className="text-xs font-bold text-gray-300 mb-1">
-            Main Effects
-          </div>
+          <div className="text-xs font-bold text-gray-300 mb-1">Main Effects</div>
           <EffectsDisplay effects={item.mainEffects} size="sm" />
         </div>
       )}
@@ -59,9 +57,7 @@ function ItemTooltip({ item }: { item: Item }) {
       {/* Secondary Effects */}
       {item.secondaryEffects.length > 0 && (
         <div className="mb-3">
-          <div className="text-xs font-bold text-gray-300 mb-1">
-            Secondary Effects
-          </div>
+          <div className="text-xs font-bold text-gray-300 mb-1">Secondary Effects</div>
           <EffectsDisplay effects={item.secondaryEffects} size="sm" />
         </div>
       )}
@@ -73,13 +69,12 @@ export function ItemPanel() {
   const [hoveredItem, setHoveredItem] = useState<Item | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  const character = useGameStore((state) => state.character);
+  const character = useGameStore((state) =>
+    state.friends.find((f) => f.id === "main"),
+  )! as Character;
   const items = character.items;
 
-  const handleMouseEnter = (
-    item: Item,
-    e: React.MouseEvent<HTMLDivElement>,
-  ) => {
+  const handleMouseEnter = (item: Item, e: React.MouseEvent<HTMLDivElement>) => {
     setHoveredItem(item);
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPos({ x: rect.left - 208, y: rect.top });
@@ -118,14 +113,10 @@ export function ItemPanel() {
                   return <Icon size={28} color="#1e293b" />;
                 })()}
             </div>
-            <div className="text-[0.5rem] font-bold text-gray-900">
-              Lv {equippedItem.level}
-            </div>
+            <div className="text-[0.5rem] font-bold text-gray-900">Lv {equippedItem.level}</div>
           </div>
         ) : (
-          <div className="text-center text-xs text-gray-500">
-            {SLOT_DISPLAY[slot]}
-          </div>
+          <div className="text-center text-xs text-gray-500">{SLOT_DISPLAY[slot]}</div>
         )}
       </div>
     );
@@ -201,13 +192,9 @@ export function ItemPanel() {
                       onClick={() => {
                         let targetSlot: EquipSlot = item.slot as EquipSlot;
                         if (item.slot === "weapon") {
-                          targetSlot = character.equippedSlots.weapon1
-                            ? "weapon2"
-                            : "weapon1";
+                          targetSlot = character.equippedSlots.weapon1 ? "weapon2" : "weapon1";
                         } else if (item.slot === "ring") {
-                          targetSlot = character.equippedSlots.ring1
-                            ? "ring2"
-                            : "ring1";
+                          targetSlot = character.equippedSlots.ring1 ? "ring2" : "ring1";
                         }
                         equipItem(item.id, targetSlot);
                         setHoveredItem(null);
@@ -223,9 +210,7 @@ export function ItemPanel() {
                             return <Icon size={22} color="#1e293b" />;
                           })()}
                       </div>
-                      <div className="text-[0.5rem] font-bold text-gray-900">
-                        Lv {item.level}
-                      </div>
+                      <div className="text-[0.5rem] font-bold text-gray-900">Lv {item.level}</div>
                     </div>
                   ) : null}
                 </div>

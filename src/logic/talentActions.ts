@@ -1,4 +1,5 @@
 import { useGameStore } from "../store/gameStore";
+import { getCombatant } from "../utils/getCombatant";
 import { addEffect, removeEffect } from "./effectActions";
 import { addTrigger } from "./triggerActions";
 
@@ -17,7 +18,7 @@ export function unlockTalent(talentId: string) {
 
   if (wasUnlocked) {
     const state = useGameStore.getState();
-    const character = state.character;
+    const character = getCombatant("main", state)!;
     const talent = state.talents.find((t) => t.id === talentId)!;
 
     talent.effects.forEach((effect) => {
@@ -27,10 +28,7 @@ export function unlockTalent(talentId: string) {
         character,
         {
           ...effect,
-          value:
-            effect.priority === "set"
-              ? effect.value
-              : effect.value * talent.level,
+          value: effect.priority === "set" ? effect.value : effect.value * talent.level,
         },
         `talent-${talent.id}`,
         talent.name,

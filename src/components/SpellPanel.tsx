@@ -20,7 +20,7 @@ const getSpellTypeColor = (type: string): string => {
 };
 
 export function SpellPanel() {
-  const character = useGameStore((state) => state.character);
+  const character = useGameStore((state) => state.friends.find((c) => c.id === "main")!);
   const allSpells = useGameStore((state) => state.spells);
   const spellPoints = useGameStore((state) => state.spellPoints);
   const equippedSpells = character.spells;
@@ -43,9 +43,7 @@ export function SpellPanel() {
     <div className="bg-slate-700 rounded-lg p-4 border border-slate-600 h-full flex flex-col">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-bold">Spells</h2>
-        <div className="text-sm font-bold text-blue-300">
-          Points: {spellPoints}
-        </div>
+        <div className="text-sm font-bold text-blue-300">Points: {spellPoints}</div>
       </div>
 
       {/* Equipped Spells Summary */}
@@ -81,16 +79,12 @@ export function SpellPanel() {
 
           return (
             <div key={type}>
-              <h3
-                className={`text-sm font-bold ${getSpellTypeColor(type)} mb-2`}
-              >
+              <h3 className={`text-sm font-bold ${getSpellTypeColor(type)} mb-2`}>
                 {getSpellTypeName(type)}
               </h3>
               <div className="grid grid-cols-4 gap-2 p-2">
                 {spells.map((spell) => {
-                  const isEquipped = equippedSpells.some(
-                    (s) => s.id === spell.id,
-                  );
+                  const isEquipped = equippedSpells.some((s) => s.id === spell.id);
                   const isUnlocked = spell.unlocked;
 
                   return (

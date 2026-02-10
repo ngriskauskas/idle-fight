@@ -1,33 +1,33 @@
 import { useGameLoop } from "./hooks/useGameLoop";
 import { useSaveSystem } from "./hooks/useSaveSystem";
-import { CharacterSection } from "./components/CharacterSection";
 import { EnemySection } from "./components/EnemySection";
 import { ProgressionBar } from "./components/ProgressionBar";
 import { PauseWidget } from "./components/PauseWidget";
 import { DebugPanel } from "./components/DebugPanel";
 import { Sidebar } from "./components/Sidebar";
+import { useCheckHealth } from "./hooks/useCheckHealth";
 import {
-  useCheckCharacterHealth,
-  useCheckEnemiesHealth,
-} from "./hooks/useCheckHealth";
-import {
-  useRecalcCharacterSpellCosts,
-  useRecalcCharacterSpellSpeeds,
-  useRecalcEnemySpellCosts,
-  useRecalcEnemySpellSpeeds,
+  useRecalcCharacterSpells,
+  useRecalcSpellCosts,
+  useRecalcSpellSpeeds,
 } from "./hooks/useRecalcCombatant";
-import { useCheckCharacterMana } from "./hooks/useCheckMana";
+import { useCheckMana } from "./hooks/useCheckMana";
+import { useCheckCastSpell } from "./hooks/useCheckCastSpell";
+import { useCheckAuraEffects } from "./hooks/useCheckAuraEffects";
+import { useCheckStatuses } from "./hooks/useCheckStatuses";
+import { FriendSection } from "./components/FriendSection";
 
 function App() {
   useSaveSystem();
   useGameLoop();
-  useCheckCharacterHealth();
-  useCheckEnemiesHealth();
-  useCheckCharacterMana();
-  useRecalcCharacterSpellCosts();
-  useRecalcCharacterSpellSpeeds();
-  useRecalcEnemySpellCosts();
-  useRecalcEnemySpellSpeeds();
+  useCheckHealth();
+  useCheckMana();
+  useRecalcCharacterSpells();
+  useRecalcSpellCosts();
+  useRecalcSpellSpeeds();
+  useCheckCastSpell();
+  useCheckAuraEffects();
+  useCheckStatuses();
 
   return (
     <div className="min-h-screen h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col">
@@ -46,7 +46,7 @@ function App() {
             </div>
 
             <div className="flex gap-4 mt-2">
-              <CharacterSection />
+              <FriendSection />
               <EnemySection />
             </div>
           </div>

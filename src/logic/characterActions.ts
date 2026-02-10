@@ -3,12 +3,15 @@ import { resetEnemies } from "./enemyActions";
 import { logKill } from "./logActions";
 import { resetProgression } from "./progressionActions";
 import { removeEffect } from "./effectActions";
+import { getCombatant } from "../utils/getCombatant";
+import { Character } from "../types";
 
 export function levelUpCharacter(): void {
   useGameStore.setState((state) => {
-    state.character.level += 1;
-    state.character.experience = 0;
-    state.character.experienceNeeded *= 2;
+    const character = getCombatant("main", state) as Character;
+    character.level += 1;
+    character.experience = 0;
+    character.experienceNeeded *= 2;
     state.talentPoints += 1;
     state.spellPoints += 1;
   });
@@ -16,30 +19,45 @@ export function levelUpCharacter(): void {
 
 export function gainXp(amount: number): void {
   useGameStore.setState((state) => {
-    state.character.experience += amount;
-  });
+    const character = getCombatant("main", state) as Character;
 
-  if (
-    useGameStore.getState().character.experience >=
-    useGameStore.getState().character.experienceNeeded
-  ) {
+    character.experience += amount;
+  });
+  const character = getCombatant("main", useGameStore.getState()) as Character;
+
+  if (character.experience >= character.experienceNeeded) {
     levelUpCharacter();
   }
 }
 
-export function killCharacter(): void {
-  logKill(useGameStore.getState().character, 0);
+export function killFriend(id: string) {
+  const friend = getCombatant(id, useGameStore.getState());
+  if (!friend) return;
+  logKill(friend, 0);
   useGameStore.setState((state) => {
-    state.character.currentRespawnTime = state.character.respawnTime;
-    state.character.isDead = true;
+    const friendState = state.friends.find((f) => f.id === id);
+    if (friendState) {
+      friendState.isDead = true;
+    }
+  });
+  if (friend.isMainCharacter) {
+    killCharacter();
+  }
+}
+
+export function killCharacter(): void {
+  useGameStore.setState((state) => {
+    const character = getCombatant("main", state) as Character;
+    //character.isDead = true;
+    character.currentRespawnTime = character.respawnTime;
   });
   resetProgression();
   resetEnemies();
 }
 
 export function respawnCharacter(): void {
-  const auraEffects = useGameStore.getState().character.auraEffects;
-  const character = useGameStore.getState().character;
+  const character = getCombatant("main", useGameStore.getState()) as Character;
+  const auraEffects = character.auraEffects;
   auraEffects.forEach((aura) => {
     aura.effects.forEach((effect) =>
       removeEffect(character, effect, `aura-${aura.id}-effect${effect.type}`),
@@ -47,28 +65,30 @@ export function respawnCharacter(): void {
   });
 
   useGameStore.setState((state) => {
-    state.character.health.current = state.character.maxHealth.total;
-    state.character.shield.current = state.character.maxShield.total;
-    state.character.currentRespawnTime = 0;
-    state.character.mana.current = state.character.maxMana.total;
-    state.character.spells.forEach((spell) => {
+    const characterState = getCombatant("main", state) as Character;
+    characterState.health.current = characterState.maxHealth.total;
+    characterState.shield.current = characterState.maxShield.total;
+    characterState.currentRespawnTime = 0;
+    characterState.mana.current = characterState.maxMana.total;
+    characterState.spells.forEach((spell) => {
       spell.attackCost.current = 0;
     });
-    state.character.statusEffects = [];
-    state.character.auraEffects = [];
-    state.character.speed.current = state.character.speed.total;
-    state.character.isDead = false;
+    characterState.statusEffects = [];
+    characterState.auraEffects = [];
+    characterState.speed.current = characterState.speed.total;
+    characterState.isDead = false;
   });
 }
 
 export function tickRespawn(): void {
-  const state = useGameStore.getState();
-  if (state.character.currentRespawnTime > 0) {
+  const character = getCombatant("main", useGameStore.getState()) as Character;
+  if (character.currentRespawnTime > 0) {
     useGameStore.setState((s) => {
-      s.character.currentRespawnTime -= 1;
+      const characterState = getCombatant("main", s) as Character;
+      characterState.currentRespawnTime -= 1;
     });
-
-    if (useGameStore.getState().character.currentRespawnTime <= 0) {
+    const character = getCombatant("main", useGameStore.getState()) as Character;
+    if (character.currentRespawnTime <= 0) {
       respawnCharacter();
     }
   }

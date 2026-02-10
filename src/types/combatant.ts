@@ -12,6 +12,9 @@ export interface Combatant {
   icon: string;
   isDead: boolean;
   isMainCharacter: boolean;
+  isEnemy: boolean;
+  level: number;
+
   health: CombatStat;
   maxHealth: CombatStat;
   shield: CombatStat;
@@ -22,7 +25,6 @@ export interface Combatant {
   attack: CombatStat;
   defense: CombatStat;
   speed: CombatStat;
-  level: number;
   healthRegen: CombatStat;
   shieldRegen: CombatStat;
   healthLeech: CombatStat;

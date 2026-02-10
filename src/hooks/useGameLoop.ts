@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { useGameStore } from "../store/gameStore";
-import { tickRegen, tickSpells } from "../logic/combatantActions";
+import { tickRegen, tickSpells, tickAuraEffects, tickStatusEffects } from "../logic/tickActions";
 import { tickRespawn } from "../logic/characterActions";
-import { tickStatusEffects } from "../logic/statusActions";
-import { tickAuraEffects } from "../logic/auraActions";
 import { tickEnemyDeathTimers } from "../logic/enemyActions";
+import { Character } from "../types";
 
 export function useGameLoop() {
-  const character = useGameStore((state) => state.character);
+  const character = useGameStore(
+    (state) => state.friends.find((f) => f.isMainCharacter)!,
+  ) as Character;
   const isPaused = useGameStore((state) => state.isPaused);
 
   useEffect(() => {

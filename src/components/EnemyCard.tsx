@@ -23,9 +23,7 @@ export function EnemyCard({ enemy }: EnemyCardProps) {
       <h3 className="text-xl font-bold mb-3 text-center flex items-center justify-center gap-2">
         {Icon ? <Icon size={26} color="#fff" /> : null}
         <span>{enemy.name}</span>
-        <span className="text-sm font-normal text-gray-400 ml-2">
-          Lvl {enemy.level}
-        </span>
+        <span className="text-sm font-normal text-gray-400 ml-2">Lvl {enemy.level}</span>
         <button
           onClick={() => setShowStatsModal(true)}
           className="ml-2 px-2 py-1 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-cyan-400 transition"
@@ -45,8 +43,8 @@ export function EnemyCard({ enemy }: EnemyCardProps) {
         <div className="text-yellow-300 flex justify-between">
           <span className="font-semibold">XP Reward</span>
           <span>
-            {formatNumber(enemy.xpReward)} × {formatNumber(enemy.xpMultiplier)}{" "}
-            = {formatNumber(Math.ceil(enemy.xpReward * enemy.xpMultiplier))}
+            {formatNumber(enemy.xpReward)} × {formatNumber(enemy.xpMultiplier)} ={" "}
+            {formatNumber(Math.ceil(enemy.xpReward * enemy.xpMultiplier))}
           </span>
         </div>
         <div className="text-blue-300 flex justify-between">

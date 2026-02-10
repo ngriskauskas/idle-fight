@@ -7,6 +7,8 @@ import { gainXp } from "./characterActions";
 import { dropItem } from "./itemActions";
 import { logKill } from "./logActions";
 import { callTriggers } from "./triggerActions";
+import { getCombatant } from "../utils/getCombatant";
+import { Character } from "../types";
 
 let enemyIdCounter = 1;
 
@@ -22,38 +24,25 @@ const ENEMY_SPAWN_LIMITS: Record<number, number> = {
   9: 4,
 };
 
-export function createEnemy(
-  preset: EnemyPreset,
-  isBoss: boolean = false,
-): Enemy {
+export function createEnemy(preset: EnemyPreset, isBoss: boolean = false): Enemy {
   const scaleMulti = getScaleMulti();
   const scaledHealth = Math.floor(preset.baseHealth * scaleMulti);
   const scaledAttack = Math.floor(preset.baseAttack * scaleMulti);
   const scaledDefense = Math.floor(preset.baseDefense * scaleMulti);
   const scaledShield = Math.floor((preset.baseShield || 0) * scaleMulti);
-  const scaledHealthRegen = Math.floor(
-    (preset.baseHealthRegen || 0) * scaleMulti,
-  );
-  const scaledShieldRegen = Math.ceil(
-    (preset.baseShieldRegen || 0) * scaleMulti,
-  );
-  const scaledMana =
-    preset.baseMana !== undefined
-      ? Math.floor(preset.baseMana * scaleMulti)
-      : 0;
+  const scaledHealthRegen = Math.floor((preset.baseHealthRegen || 0) * scaleMulti);
+  const scaledShieldRegen = Math.ceil((preset.baseShieldRegen || 0) * scaleMulti);
+  const scaledMana = preset.baseMana !== undefined ? Math.floor(preset.baseMana * scaleMulti) : 0;
   const scaledManaCost =
-    preset.baseManaCost !== undefined
-      ? Math.floor(preset.baseManaCost * scaleMulti)
-      : 0;
+    preset.baseManaCost !== undefined ? Math.floor(preset.baseManaCost * scaleMulti) : 0;
   const scaledManaRegen =
-    preset.baseManaRegen !== undefined
-      ? Math.floor(preset.baseManaRegen * scaleMulti)
-      : 0;
+    preset.baseManaRegen !== undefined ? Math.floor(preset.baseManaRegen * scaleMulti) : 0;
   const xpReward = scaleMulti;
   const level = useGameStore.getState().progress.wave;
 
   return {
     isDead: false,
+    isEnemy: true,
     deathTimer: 0,
     isMainCharacter: false,
     id: (enemyIdCounter++).toString(),
@@ -179,9 +168,7 @@ export function spawnNewEnemies() {
       const bossEnemy = createEnemy(boss, true);
       state.enemies.push(bossEnemy);
     } else {
-      const availableEnemies = DEFAULT_ENEMIES.filter(
-        (e) => e.minWave && e.minWave <= wave,
-      );
+      const availableEnemies = DEFAULT_ENEMIES.filter((e) => e.minWave && e.minWave <= wave);
 
       if (availableEnemies.length === 0) return;
 
@@ -195,39 +182,40 @@ export function spawnNewEnemies() {
         state.enemies.push(enemy);
       }
     }
-
+    const character = getCombatant("main", state)!;
     state.enemies.forEach((enemy) => {
-      enemy.triggers.onDeath = state.character.triggers.onDeath;
+      enemy.triggers.onDeath = character.triggers.onDeath;
     });
   });
 
-  callTriggers("onEnemySpawn", useGameStore.getState().character);
+  callTriggers("onEnemySpawn", "main");
 }
 
-export function killEnemy(enemyIndex: number): void {
+export function killEnemy(enemyId: string): void {
   const state = useGameStore.getState();
-  const enemy = state.enemies[enemyIndex];
-
-  callTriggers("onDeath", enemy);
+  const enemy = getCombatant(enemyId, state) as Enemy | undefined;
+  if (!enemy) return;
+  callTriggers("onDeath", enemy.id);
   const xpReward = Math.ceil(enemy.xpReward * enemy.xpMultiplier);
-  const enemyLevel = enemy.level;
 
   logKill(enemy, xpReward);
-
   gainXp(xpReward);
 
-  const totalDropChance =
-    state.character.itemDropChance.total + enemy.itemDropRateBonus / 100;
+  const character = getCombatant("main", state)! as Character;
+
+  const totalDropChance = character.itemDropChance.total + enemy.itemDropRateBonus / 100;
   if (Math.random() < totalDropChance) {
-    dropItem(enemyLevel);
+    dropItem(enemy.level);
   }
 
   useGameStore.setState((state) => {
+    const enemyIndex = state.enemies.findIndex((e) => e.id === enemyId);
     state.enemies[enemyIndex].deathTimer = 1;
     state.enemies[enemyIndex].isDead = true;
   });
-
-  callTriggers("onKill", state.character);
+  state.friends.forEach((friend) => {
+    callTriggers("onKill", friend.id);
+  });
 }
 
 export function removeEnemy(enemyIndex: number): void {

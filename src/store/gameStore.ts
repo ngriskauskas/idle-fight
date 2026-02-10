@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { Character, Enemy, Spell, Talent, Log } from "../types";
+import { Character, Enemy, Spell, Talent, Log, Combatant } from "../types";
 import { DEFAULT_SPELLS } from "../data/spells";
 import { DEFAULT_TALENTS } from "../data/talents/index";
 import { AnimationOccurrence } from "../types/animation";
 import { STRIKE } from "../data/spells/physSpells";
 
 export interface GameState {
-  character: Character;
   enemies: Enemy[];
+  friends: Combatant[];
   itemIdCounter: number;
   logIdCounter: number;
   logs: Log[];
@@ -35,11 +35,12 @@ export interface GameState {
 }
 
 const initialCharacter: Character = {
-  id: "player",
+  id: "main",
   name: "Player",
   icon: "sword",
   isDead: false,
   isMainCharacter: true,
+  isEnemy: false,
   health: { base: 25, total: 25, current: 25 },
   maxHealth: { base: 25, total: 25, current: 25 },
   shield: { base: 0, total: 0, current: 0 },
@@ -125,8 +126,8 @@ const initialCharacter: Character = {
 export const useGameStore = create<GameState>()(
   immer(
     (): GameState => ({
-      character: initialCharacter,
       enemies: [],
+      friends: [initialCharacter],
       itemIdCounter: 0,
       logIdCounter: 0,
       logs: [],

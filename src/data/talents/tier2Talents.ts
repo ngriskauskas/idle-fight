@@ -1,4 +1,4 @@
-import { Talent } from "../../types";
+import { AuraSpell, Talent } from "../../types";
 
 export const SHIELD_SPECIAIST: Talent = {
   id: "shield-specialist",
@@ -151,15 +151,11 @@ export const MANA_OVERLOAD: Talent = {
         description: "Increase mana cost significantly for a short duration.",
         icon: "💥",
         spellType: "aura",
-        damage: { base: 0, total: 0, current: 0 },
         attackCost: { base: 0, total: 0, current: 0 },
         unlockCost: 0,
         unlocked: true,
-        critChance: { base: 0, total: 0, current: 0 },
-        critMultiplier: { base: 1, total: 1, current: 1 },
         manaCost: { base: 0, total: 0, current: 0 },
         isAoe: false,
-        statusStats: {},
         auraEffect: {
           id: "mana-overload-aura-effect",
           name: "Mana Overload Effect",
@@ -183,7 +179,7 @@ export const MANA_OVERLOAD: Talent = {
           stacks: 1,
           totalTime: 5,
         },
-      },
+      } as AuraSpell,
     },
   ],
 };

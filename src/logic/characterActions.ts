@@ -7,7 +7,12 @@ import { getCombatant } from "../utils/getCombatant";
 import { Character, Talent } from "../types";
 
 const BASE_SPELL_SLOTS = 2;
-const SPELL_SLOT_LEVELS = [3, 6, 10, 15];
+export const SPELL_SLOT_LEVELS = [3, 6, 10, 15];
+
+// the next character level that grants a spell slot, if any are left
+export function getNextSpellSlotLevel(level: number): number | undefined {
+  return SPELL_SLOT_LEVELS.find((l) => l > level);
+}
 
 export function getSpellCount(level: number, talents: Talent[] = []): number {
   const fromLevels = BASE_SPELL_SLOTS + SPELL_SLOT_LEVELS.filter((l) => level >= l).length;

@@ -10,6 +10,7 @@ import { DetailedStatsModal } from "./DetailedStatsModal";
 import { CombatLogAnimation } from "./CombatLogAnimation";
 import { formatNumber } from "../utils/format";
 import { Combatant } from "../types";
+import { getNextSpellSlotLevel } from "../logic/characterActions";
 
 interface CombatantCardProps {
   combatant: Combatant;
@@ -134,6 +135,14 @@ export function CombatantCard({ combatant }: CombatantCardProps) {
       <SpellSection
         spells={combatant.spells}
         caster={combatant}
+        slots={
+          combatant.isMainCharacter
+            ? {
+                total: (combatant as Character).spellCount,
+                nextLevel: getNextSpellSlotLevel(combatant.level),
+              }
+            : undefined
+        }
         colorClass={
           combatant.statusEffects.some((e) => e.type === "ice")
             ? "bg-gradient-to-r from-cyan-500 to-cyan-600"

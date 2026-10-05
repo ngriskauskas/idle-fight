@@ -1,5 +1,8 @@
 import { useGameStore } from "../store/gameStore";
 import { SpellItem } from "./SpellItem";
+import type { Character } from "../types/character";
+import { FaLock } from "react-icons/fa";
+import { getNextSpellSlotLevel } from "../logic/characterActions";
 
 const getSpellTypeName = (type: string): string => {
   const names: Record<string, string> = {
@@ -20,10 +23,12 @@ const getSpellTypeColor = (type: string): string => {
 };
 
 export function SpellPanel() {
-  const character = useGameStore((state) => state.friends.find((c) => c.id === "main")!);
+  const character = useGameStore((state) => state.friends.find((c) => c.id === "main")!) as Character;
   const allSpells = useGameStore((state) => state.spells);
   const spellPoints = useGameStore((state) => state.spellPoints);
   const equippedSpells = character.spells;
+  const freeSlots = Math.max(0, character.spellCount - equippedSpells.length);
+  const nextSlotLevel = getNextSpellSlotLevel(character.level);
 
   // Group spells by type
   const spellsByType = allSpells.reduce(
@@ -46,27 +51,48 @@ export function SpellPanel() {
         <div className="text-sm font-bold text-blue-300">Points: {spellPoints}</div>
       </div>
 
-      {/* Equipped Spells Summary */}
+      {/* Equipped Spells: one box per slot, then the next slot to unlock */}
       <div className="mb-4 pb-4 border-b border-slate-500">
-        <div className="text-sm font-bold text-gray-300 mb-2">
-          Equipped ({equippedSpells.length}):
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-bold text-gray-300">
+            Spell Slots:{" "}
+            <span className={freeSlots > 0 ? "text-yellow-300" : "text-gray-300"}>
+              {equippedSpells.length} / {character.spellCount}
+            </span>
+          </span>
+          {freeSlots > 0 && (
+            <span className="text-xs font-bold text-yellow-300 animate-pulse">
+              {freeSlots} free
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
-          {equippedSpells.length === 0 ? (
-            <span className="text-xs text-gray-400">No spells equipped</span>
-          ) : (
-            equippedSpells.map((spell) => {
-              const isUnlocked = spell.unlocked;
-              return (
-                <SpellItem
-                  key={spell.id}
-                  spell={spell}
-                  isEquipped={true}
-                  isUnlocked={isUnlocked}
-                  spellPoints={spellPoints}
-                />
-              );
-            })
+          {equippedSpells.map((spell) => (
+            <SpellItem
+              key={spell.id}
+              spell={spell}
+              isEquipped={true}
+              isUnlocked={spell.unlocked}
+              spellPoints={spellPoints}
+            />
+          ))}
+          {Array.from({ length: freeSlots }).map((_, i) => (
+            <div
+              key={`empty-${i}`}
+              className="w-16 h-16 rounded border-2 border-dashed border-yellow-400/70 bg-slate-800 flex items-center justify-center text-xs text-yellow-300/80"
+              title="Empty spell slot. Click an unlocked spell below to equip it"
+            >
+              Empty
+            </div>
+          ))}
+          {nextSlotLevel !== undefined && (
+            <div
+              className="w-16 h-16 rounded border-2 border-dashed border-slate-500 bg-slate-800/50 flex flex-col items-center justify-center gap-1 text-xs text-gray-400"
+              title={`Next spell slot unlocks at level ${nextSlotLevel}`}
+            >
+              <FaLock size={14} />
+              <span>Lvl {nextSlotLevel}</span>
+            </div>
           )}
         </div>
       </div>

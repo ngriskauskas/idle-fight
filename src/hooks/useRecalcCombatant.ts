@@ -3,6 +3,13 @@ import { useGameStore } from "../store/gameStore";
 import { MagicSpell } from "../types";
 import { getCombatant } from "../utils/getCombatant";
 
+// Speed shortens a cast by a flat amount, but never below 30% of its base time.
+const MIN_ATTACK_COST_RATIO = 0.3;
+
+function getAttackCost(base: number, speed: number): number {
+  return Math.max(1, Math.ceil(base * MIN_ATTACK_COST_RATIO), base - speed);
+}
+
 export function useRecalcCharacterSpells() {
   const speed = useGameStore((state) => state.friends.find((x) => x.id === "main")!.speed.current);
   const manaCost = useGameStore(
@@ -15,7 +22,7 @@ export function useRecalcCharacterSpells() {
       const character = getCombatant("main", state)!;
 
       character.spells.forEach((spell) => {
-        spell.attackCost.total = Math.max(1, spell.attackCost.base - character.speed.current);
+        spell.attackCost.total = getAttackCost(spell.attackCost.base, character.speed.current);
       });
 
       character.spells
@@ -60,7 +67,7 @@ export function useRecalcSpellSpeeds() {
       const allCombatants = [...state.friends, ...state.enemies];
       allCombatants.forEach((combatant) => {
         combatant.spells.forEach((spell) => {
-          spell.attackCost.total = Math.max(1, spell.attackCost.base - combatant.speed.current);
+          spell.attackCost.total = getAttackCost(spell.attackCost.base, combatant.speed.current);
         });
       });
     });

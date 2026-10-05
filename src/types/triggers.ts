@@ -1,4 +1,5 @@
-import { Spell } from "./spell";
+import { AuraSpell, MagicSpell, PhysicalSpell } from "./spell";
+import { StatusEffectType } from "./status";
 
 export type TriggerType =
   | "onHit"
@@ -10,6 +11,7 @@ export type TriggerType =
   | "onLowHealth"
   | "onFullMana"
   | "tickTrigger"
+  | "onBleedChange"
   | "onDeath";
 
 export type TriggerAction =
@@ -19,7 +21,19 @@ export type TriggerAction =
   | "castAuraAll"
   | "poisonAll"
   | "poisonAoe"
-  | "poisonSpread";
+  | "poisonSpread"
+  | "multiplyPoison"
+  | "healForBleedStacks"
+  | "minusDefensePerBleedStack"
+  | "applyStatus"
+  | "applyStatusSelf"
+  | "applyStatusAoe"
+  | "multiplyStatus"
+  | "spreadStatus"
+  | "shatterStatus"
+  | "healPerOwnStatus"
+  | "gainShield"
+  | "gainMana";
 
 export interface Trigger {
   id: string;
@@ -27,5 +41,6 @@ export interface Trigger {
   action: TriggerAction;
   chance?: number;
   value?: number;
-  spell?: Spell;
+  status?: StatusEffectType;
+  spell?: PhysicalSpell | MagicSpell | AuraSpell;
 }

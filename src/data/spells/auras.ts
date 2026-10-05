@@ -1,52 +1,17 @@
-import { Spell } from "../../types";
+import { AuraSpell } from "../../types";
 
-export const OVERCHARGE: Spell = {
-  id: "overcharge",
-  name: "Overcharge",
-  description:
-    "Dramatically increase your speed and crit chance, but reduce your defense to zero.",
-  spellType: "aura",
-  icon: "bolt",
-  damage: { base: 0, total: 0, current: 0 },
-  attackCost: { base: 60, total: 60, current: 0 },
-  unlockCost: 7,
-  unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
-  manaCost: { base: 35, total: 35, current: 0 },
-  isAoe: false,
-  statusStats: {},
-  auraEffect: {
-    id: "overcharge",
-    name: "Overcharge",
-    icon: "bolt",
-    effects: [
-      { type: "speed", value: 50, valueType: "flat", priority: "normal" },
-      { type: "critChance", value: 40, valueType: "flat", priority: "normal" },
-      { type: "defense", value: -999, valueType: "flat", priority: "normal" },
-    ],
-    baseTime: 8,
-    currentTime: 8,
-    totalTime: 8,
-    stacks: 1,
-  },
-};
-
-export const HEALTH_REGEN: Spell = {
+export const HEALTH_REGEN: AuraSpell = {
   id: "health_regen",
   name: "Health Regeneration",
   description: "Enhance your health regeneration for a time",
   spellType: "aura",
   icon: "heal",
-  damage: { base: 0, total: 0, current: 0 },
   attackCost: { base: 70, total: 70, current: 0 },
   unlockCost: 0,
   unlocked: true,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
   manaCost: { base: 25, total: 25, current: 0 },
   isAoe: false,
-  statusStats: {},
+  isSelfTargeted: true,
   auraEffect: {
     id: "regeneration",
     name: "Regeneration",
@@ -54,10 +19,11 @@ export const HEALTH_REGEN: Spell = {
     effects: [
       {
         type: "healthRegen",
-        value: 8,
+        value: 2,
         valueType: "flat",
         priority: "normal",
       },
+      { type: "healthRegen", value: 50, valueType: "percentage", priority: "normal" },
     ],
     baseTime: 10,
     currentTime: 10,
@@ -66,21 +32,18 @@ export const HEALTH_REGEN: Spell = {
   },
 };
 
-export const BATTLE_CRY: Spell = {
+export const BATTLE_CRY: AuraSpell = {
   id: "battle_cry",
   name: "Battle Cry",
   description: "Boost your attack power and critical chance",
   spellType: "aura",
   icon: "shout",
-  damage: { base: 0, total: 0, current: 0 },
   attackCost: { base: 80, total: 80, current: 0 },
   unlockCost: 2,
   unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
   manaCost: { base: 30, total: 30, current: 0 },
   isAoe: false,
-  statusStats: {},
+  isSelfTargeted: true,
   auraEffect: {
     id: "battle_cry",
     name: "Battle Cry",
@@ -92,6 +55,7 @@ export const BATTLE_CRY: Spell = {
         valueType: "flat",
         priority: "normal",
       },
+      { type: "damage", value: 15, valueType: "percentage", priority: "normal" },
       {
         type: "critChance",
         value: 20,
@@ -100,7 +64,7 @@ export const BATTLE_CRY: Spell = {
       },
       {
         type: "critMultiplier",
-        value: 1.5,
+        value: 25,
         valueType: "flat",
         priority: "normal",
       },
@@ -112,21 +76,18 @@ export const BATTLE_CRY: Spell = {
   },
 };
 
-export const FORTITUDE: Spell = {
+export const FORTITUDE: AuraSpell = {
   id: "fortitude",
   name: "Fortitude",
   description: "Increase your defense and reduce damage taken",
   spellType: "aura",
   icon: "shield",
-  damage: { base: 0, total: 0, current: 0 },
   attackCost: { base: 75, total: 75, current: 0 },
   unlockCost: 3,
   unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
   manaCost: { base: 35, total: 35, current: 0 },
   isAoe: false,
-  statusStats: {},
+  isSelfTargeted: true,
   auraEffect: {
     id: "fortitude",
     name: "Fortitude",
@@ -138,15 +99,16 @@ export const FORTITUDE: Spell = {
         valueType: "flat",
         priority: "normal",
       },
+      { type: "defense", value: 20, valueType: "percentage", priority: "normal" },
       {
         type: "shield",
-        value: 10,
+        value: 8,
         valueType: "flat",
         priority: "normal",
       },
       {
         type: "shieldRegen",
-        value: 2,
+        value: 0.5,
         valueType: "flat",
         priority: "normal",
       },
@@ -158,26 +120,26 @@ export const FORTITUDE: Spell = {
   },
 };
 
-export const ARCANE_BOOST: Spell = {
+export const ARCANE_BOOST: AuraSpell = {
   id: "arcane_boost",
   name: "Arcane Boost",
   description: "Enhance your mana regeneration and spell efficiency",
   spellType: "aura",
   icon: "wand",
-  damage: { base: 0, total: 0, current: 0 },
   attackCost: { base: 70, total: 70, current: 0 },
   unlockCost: 4,
   unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
   manaCost: { base: 20, total: 20, current: 0 },
   isAoe: false,
-  statusStats: {},
+  isSelfTargeted: true,
   auraEffect: {
     id: "arcane_boost",
     name: "Arcane Boost",
     icon: "wand",
     effects: [
+      { type: "mana", value: 20, valueType: "percentage", priority: "normal" },
+      { type: "manaRegen", value: 30, valueType: "percentage", priority: "normal" },
+      { type: "manaCost", value: 20, valueType: "percentage", priority: "normal" },
       {
         type: "mana",
         value: 50,
@@ -192,7 +154,7 @@ export const ARCANE_BOOST: Spell = {
       },
       {
         type: "manaCost",
-        value: 10,
+        value: 5,
         valueType: "flat",
         priority: "normal",
       },
@@ -204,22 +166,18 @@ export const ARCANE_BOOST: Spell = {
   },
 };
 
-export const CURSE: Spell = {
+export const CURSE: AuraSpell = {
   id: "curse",
   name: "Curse",
-  description: "Curse yourself, doubling damage but slowly speed and defense",
+  description: "Curse an enemy, lowering its defense and slowing its attacks",
   spellType: "aura",
   icon: "skull",
-  damage: { base: 0, total: 0, current: 0 },
   attackCost: { base: 60, total: 60, current: 0 },
   unlockCost: 5,
   unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
   manaCost: { base: 40, total: 40, current: 0 },
   isAoe: false,
   isSelfTargeted: false,
-  statusStats: {},
   auraEffect: {
     id: "curse",
     name: "Curse",
@@ -227,46 +185,44 @@ export const CURSE: Spell = {
     effects: [
       {
         type: "defense",
-        value: -5,
-        valueType: "flat",
+        value: -30,
+        valueType: "percentage",
         priority: "normal",
       },
       {
         type: "speed",
-        value: -25,
+        value: -8,
         valueType: "flat",
         priority: "normal",
       },
     ],
-    baseTime: 150,
-    currentTime: 150,
-    totalTime: 150,
+    baseTime: 30,
+    currentTime: 30,
+    totalTime: 30,
     stacks: 1,
   },
 };
 
-export const LIFESTEAL: Spell = {
+export const LIFESTEAL: AuraSpell = {
   id: "lifesteal",
   name: "Lifesteal",
   description: "Drain enemy health to restore your own",
   spellType: "aura",
   icon: "bloodKnife",
-  damage: { base: 0, total: 0, current: 0 },
   attackCost: { base: 15, total: 15, current: 0 },
   unlockCost: 6,
   unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
   manaCost: { base: 10, total: 10, current: 10 },
   isAoe: false,
-  statusStats: {},
   isSelfTargeted: true,
   auraEffect: {
     id: "lifesteal",
     name: "Lifesteal",
     icon: "bloodKnife",
     scaling: 1,
+    maxStacks: 10,
     effects: [
+      { type: "healthLeech", value: 10, valueType: "percentage", priority: "normal" },
       {
         type: "healthLeech",
         value: 20,
@@ -281,54 +237,17 @@ export const LIFESTEAL: Spell = {
   },
 };
 
-export const IMMORTALITY: Spell = {
-  id: "immortality",
-  name: "Immortality",
-  description:
-    "Become nearly invulnerable (massive defense & shield), but unable to attack or heal for a short time.",
-  spellType: "aura",
-  icon: "shield",
-  damage: { base: 0, total: 0, current: 0 },
-  attackCost: { base: 100, total: 100, current: 0 },
-  unlockCost: 8,
-  unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
-  manaCost: { base: 60, total: 60, current: 0 },
-  isAoe: false,
-  statusStats: {},
-  auraEffect: {
-    id: "immortality",
-    name: "Immortality",
-    icon: "shield",
-    effects: [
-      { type: "defense", value: 9999, valueType: "flat", priority: "normal" },
-      { type: "shield", value: 9999, valueType: "flat", priority: "normal" },
-      { type: "damage", value: 0, valueType: "flat", priority: "set" },
-      { type: "healthRegen", value: 0, valueType: "flat", priority: "set" },
-    ],
-    baseTime: 5,
-    currentTime: 5,
-    totalTime: 5,
-    stacks: 1,
-  },
-};
-
-export const POISON_POOL: Spell = {
+export const POISON_POOL: AuraSpell = {
   id: "poison_pool",
   name: "Poison Pool",
   description: "Leave a pool of poison that damages enemies over time",
   spellType: "aura",
   icon: "poisonGas",
-  damage: { base: 0, total: 0, current: 0 },
   attackCost: { base: 80, total: 80, current: 0 },
-  unlockCost: 9,
+  unlockCost: 5,
   unlocked: false,
-  critChance: { base: 0, total: 0, current: 0 },
-  critMultiplier: { base: 1, total: 1, current: 1 },
   manaCost: { base: 40, total: 40, current: 0 },
   isAoe: true,
-  statusStats: {},
   isSelfTargeted: true,
   auraEffect: {
     id: "poison_pool",
@@ -346,6 +265,220 @@ export const POISON_POOL: Spell = {
     baseTime: 20,
     currentTime: 20,
     totalTime: 20,
+    stacks: 1,
+  },
+};
+
+export const MARROW_DRINKER: AuraSpell = {
+  id: "marrow_drinker",
+  name: "Marrow Drinker",
+  description: "Gain health scaled by total bleed stacks on enemies",
+  spellType: "aura",
+  icon: "blood",
+  attackCost: { base: 20, total: 20, current: 0 },
+  unlockCost: 6,
+  unlocked: false,
+  manaCost: { base: 15, total: 15, current: 0 },
+  isAoe: false,
+  isSelfTargeted: true,
+  auraEffect: {
+    id: "marrow_drinker",
+    name: "Marrow Drinker",
+    icon: "blood",
+    scaling: 2,
+    effects: [],
+    tickTriggers: [
+      {
+        id: "marrow_drinker_tick",
+        type: "tickTrigger",
+        action: "healForBleedStacks",
+        value: 1,
+      },
+    ],
+    baseTime: 30,
+    currentTime: 30,
+    totalTime: 30,
+    stacks: 1,
+  },
+};
+
+export const BLEED_SHATTER: AuraSpell = {
+  id: "bleed_shatter",
+  name: "Bleed Shatter",
+  description: "Reduces enemy defense by 1 for each bleed stack on them.",
+  spellType: "aura",
+  icon: "checkedSield",
+  attackCost: { base: 30, total: 30, current: 0 },
+  unlockCost: 6,
+  unlocked: false,
+  manaCost: { base: 20, total: 20, current: 0 },
+  isAoe: false,
+  isSelfTargeted: false,
+  auraEffect: {
+    id: "bleed_shatter",
+    name: "Bleed Shatter",
+    icon: "checkedSield",
+    effects: [],
+    triggers: [
+      {
+        id: "bleed_shatter_trigger",
+        type: "onBleedChange",
+        action: "minusDefensePerBleedStack",
+        value: 1,
+      },
+    ],
+    baseTime: 20,
+    currentTime: 20,
+    totalTime: 20,
+    stacks: 1,
+  },
+};
+
+export const WAR_CRY: AuraSpell = {
+  id: "war_cry",
+  name: "War Cry",
+  description: "Quick shout. +8% damage per stack (max 12), but all stacks are lost when you lose health",
+  spellType: "aura",
+  icon: "shout",
+  attackCost: { base: 30, total: 30, current: 0 },
+  unlockCost: 3,
+  unlocked: false,
+  manaCost: { base: 10, total: 10, current: 0 },
+  isAoe: false,
+  isSelfTargeted: true,
+  auraEffect: {
+    id: "war_cry",
+    name: "War Cry",
+    icon: "shout",
+    scaling: 1,
+    maxStacks: 12,
+    isFragile: true,
+    effects: [{ type: "damage", value: 8, valueType: "percentage", priority: "normal" }],
+    baseTime: 15,
+    currentTime: 15,
+    totalTime: 15,
+    stacks: 1,
+  },
+};
+
+export const RAISE_SHIELD: AuraSpell = {
+  id: "raise_shield",
+  name: "Raise Shield",
+  description: "Gain shield and shield regen for a short time, but every stack slows all your casts. Stacks up to 5",
+  spellType: "aura",
+  icon: "bigShield",
+  attackCost: { base: 40, total: 40, current: 0 },
+  unlockCost: 3,
+  unlocked: false,
+  manaCost: { base: 25, total: 25, current: 0 },
+  isAoe: false,
+  isSelfTargeted: true,
+  auraEffect: {
+    id: "raise_shield",
+    name: "Raise Shield",
+    icon: "bigShield",
+    scaling: 1,
+    maxStacks: 5,
+    effects: [
+      { type: "shield", value: 4, valueType: "flat", priority: "normal" },
+      { type: "shield", value: 4, valueType: "percentage", priority: "normal" },
+      { type: "speed", value: -1, valueType: "flat", priority: "normal" },
+      { type: "shieldRegen", value: 1, valueType: "flat", priority: "normal" },
+    ],
+    baseTime: 12,
+    currentTime: 12,
+    totalTime: 12,
+    stacks: 1,
+  },
+};
+
+export const IMMOLATION: AuraSpell = {
+  id: "immolation",
+  name: "Immolation",
+  description: "Set yourself ablaze. Every second all enemies burn, and so do you",
+  spellType: "aura",
+  icon: "fire2",
+  attackCost: { base: 90, total: 90, current: 0 },
+  unlockCost: 5,
+  unlocked: false,
+  manaCost: { base: 30, total: 30, current: 0 },
+  isAoe: true,
+  isSelfTargeted: true,
+  auraEffect: {
+    id: "immolation",
+    name: "Immolation",
+    icon: "fire2",
+    effects: [],
+    tickTriggers: [
+      {
+        id: "immolation_burn_enemies",
+        type: "tickTrigger",
+        action: "applyStatusAoe",
+        status: "fire",
+        value: 3,
+      },
+      {
+        id: "immolation_burn_self",
+        type: "tickTrigger",
+        action: "applyStatusSelf",
+        status: "fire",
+        value: 1,
+      },
+    ],
+    baseTime: 15,
+    currentTime: 15,
+    totalTime: 15,
+    stacks: 1,
+  },
+};
+
+export const EXHAUSTION: AuraSpell = {
+  id: "exhaustion",
+  name: "Exhaustion",
+  description: "Curse an enemy, making it attack much slower",
+  spellType: "aura",
+  icon: "skull",
+  attackCost: { base: 90, total: 90, current: 0 },
+  unlockCost: 5,
+  unlocked: false,
+  manaCost: { base: 20, total: 20, current: 0 },
+  isAoe: false,
+  isSelfTargeted: false,
+  auraEffect: {
+    id: "exhaustion",
+    name: "Exhaustion",
+    icon: "skull",
+    effects: [{ type: "speed", value: -30, valueType: "flat", priority: "normal" }],
+    baseTime: 15,
+    currentTime: 15,
+    totalTime: 15,
+    stacks: 1,
+  },
+};
+
+export const DISARM: AuraSpell = {
+  id: "disarm",
+  name: "Disarm",
+  description: "Curse all enemies so they cannot crit and hit weaker",
+  spellType: "aura",
+  icon: "broadsword",
+  attackCost: { base: 110, total: 110, current: 0 },
+  unlockCost: 6,
+  unlocked: false,
+  manaCost: { base: 25, total: 25, current: 0 },
+  isAoe: true,
+  isSelfTargeted: false,
+  auraEffect: {
+    id: "disarm",
+    name: "Disarm",
+    icon: "broadsword",
+    effects: [
+      { type: "critChance", value: -1, valueType: "flat", priority: "set" },
+      { type: "damage", value: -20, valueType: "percentage", priority: "normal" },
+    ],
+    baseTime: 15,
+    currentTime: 15,
+    totalTime: 15,
     stacks: 1,
   },
 };

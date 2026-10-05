@@ -6,11 +6,20 @@ import { progressEnemy, getScaleMulti } from "./progressionActions";
 import { gainXp } from "./characterActions";
 import { dropItem } from "./itemActions";
 import { logKill } from "./logActions";
-import { callTriggers } from "./triggerActions";
+import { callTriggerAction, callTriggers } from "./triggerActions";
 import { getCombatant } from "../utils/getCombatant";
 import { Character } from "../types";
 
 let enemyIdCounter = 1;
+
+// how long a dead enemy stays on the field before the next can spawn
+const ENEMY_DEATH_SECONDS = 0.5;
+
+const MAX_ITEM_DROP_CHANCE = 0.5;
+
+// Magic damage is spell damage times mana cost. At full scale an enemy caster hits for
+// several times a melee enemy of the same wave; this keeps a spell near twice a melee hit.
+export const ENEMY_MANA_COST_SCALE = 0.2;
 
 const ENEMY_SPAWN_LIMITS: Record<number, number> = {
   1: 1, // Enemy 1: max 1
@@ -24,9 +33,29 @@ const ENEMY_SPAWN_LIMITS: Record<number, number> = {
   9: 4,
 };
 
+// Extra enemy health on top of the shared scale, so a geared character needs several hits
+// and statuses get time to tick. It follows the wave inside the world, as enemy types do:
+// each world opens with quick fights and reaches the cap at its wave 5.
+const MAX_ENEMY_HEALTH_MULTI = 3;
+// a boss should outlast a burst, so sustained damage and its own trait get to matter
+const BOSS_HEALTH_MULTI = 1.5;
+// the first bosses of a world would otherwise be over in a few hits, decided by one crit
+const MIN_BOSS_WAVE_HEALTH_MULTI = 2;
+
+function getHealthMulti(): number {
+  const { wave } = useGameStore.getState().progress;
+  return Math.min(MAX_ENEMY_HEALTH_MULTI, 1 + (wave - 1) * 0.5);
+}
+
 export function createEnemy(preset: EnemyPreset, isBoss: boolean = false): Enemy {
   const scaleMulti = getScaleMulti();
-  const scaledHealth = Math.floor(preset.baseHealth * scaleMulti);
+  const scaledHealth = Math.floor(
+    preset.baseHealth *
+      scaleMulti *
+      (isBoss
+        ? Math.max(MIN_BOSS_WAVE_HEALTH_MULTI, getHealthMulti()) * BOSS_HEALTH_MULTI
+        : getHealthMulti()),
+  );
   const scaledAttack = Math.floor(preset.baseAttack * scaleMulti);
   const scaledDefense = Math.floor(preset.baseDefense * scaleMulti);
   const scaledShield = Math.floor((preset.baseShield || 0) * scaleMulti);
@@ -34,7 +63,9 @@ export function createEnemy(preset: EnemyPreset, isBoss: boolean = false): Enemy
   const scaledShieldRegen = Math.ceil((preset.baseShieldRegen || 0) * scaleMulti);
   const scaledMana = preset.baseMana !== undefined ? Math.floor(preset.baseMana * scaleMulti) : 0;
   const scaledManaCost =
-    preset.baseManaCost !== undefined ? Math.floor(preset.baseManaCost * scaleMulti) : 0;
+    preset.baseManaCost !== undefined
+      ? Math.floor(preset.baseManaCost * scaleMulti * ENEMY_MANA_COST_SCALE)
+      : 0;
   const scaledManaRegen =
     preset.baseManaRegen !== undefined ? Math.floor(preset.baseManaRegen * scaleMulti) : 0;
   const xpReward = scaleMulti;
@@ -98,7 +129,8 @@ export function createEnemy(preset: EnemyPreset, isBoss: boolean = false): Enemy
       current: scaledManaCost,
     },
     critChance: { base: 0, total: 0, current: 0 },
-    critMultiplier: { base: 1.5, total: 1.5, current: 1.5 },
+    // 1, so an enemy crit is worth exactly the spell's own multiplier (about 1.5x)
+    critMultiplier: { base: 1, total: 1, current: 1 },
     statusEffects: [],
     statusStats: {
       poison: { base: 0, total: 0, current: 0 },
@@ -142,6 +174,7 @@ export function createEnemy(preset: EnemyPreset, isBoss: boolean = false): Enemy
       onTakeAttack: [],
       tickTrigger: [],
       onDeath: [],
+      onBleedChange: [],
     },
   };
 }
@@ -182,10 +215,6 @@ export function spawnNewEnemies() {
         state.enemies.push(enemy);
       }
     }
-    const character = getCombatant("main", state)!;
-    state.enemies.forEach((enemy) => {
-      enemy.triggers.onDeath = character.triggers.onDeath;
-    });
   });
 
   callTriggers("onEnemySpawn", "main");
@@ -195,7 +224,10 @@ export function killEnemy(enemyId: string): void {
   const state = useGameStore.getState();
   const enemy = getCombatant(enemyId, state) as Enemy | undefined;
   if (!enemy) return;
-  callTriggers("onDeath", enemy.id);
+  // the character's onDeath triggers run on each enemy that dies
+  getCombatant("main", state)!.triggers.onDeath.forEach((trigger) =>
+    callTriggerAction(trigger, enemy),
+  );
   const xpReward = Math.ceil(enemy.xpReward * enemy.xpMultiplier);
 
   logKill(enemy, xpReward);
@@ -203,14 +235,17 @@ export function killEnemy(enemyId: string): void {
 
   const character = getCombatant("main", state)! as Character;
 
-  const totalDropChance = character.itemDropChance.total + enemy.itemDropRateBonus / 100;
+  const totalDropChance = Math.min(
+    MAX_ITEM_DROP_CHANCE,
+    character.itemDropChance.total + enemy.itemDropRateBonus / 100,
+  );
   if (Math.random() < totalDropChance) {
     dropItem(enemy.level);
   }
 
   useGameStore.setState((state) => {
     const enemyIndex = state.enemies.findIndex((e) => e.id === enemyId);
-    state.enemies[enemyIndex].deathTimer = 1;
+    state.enemies[enemyIndex].deathTimer = ENEMY_DEATH_SECONDS;
     state.enemies[enemyIndex].isDead = true;
   });
   state.friends.forEach((friend) => {
@@ -218,9 +253,9 @@ export function killEnemy(enemyId: string): void {
   });
 }
 
-export function removeEnemy(enemyIndex: number): void {
+export function removeEnemy(enemyId: string): void {
   useGameStore.setState((state) => {
-    state.enemies.splice(enemyIndex, 1);
+    state.enemies = state.enemies.filter((e) => e.id !== enemyId);
   });
 
   if (useGameStore.getState().enemies.length === 0) {
@@ -236,9 +271,9 @@ export function tickEnemyDeathTimers(): void {
     });
   });
 
-  useGameStore.getState().enemies.forEach((enemy, index) => {
+  useGameStore.getState().enemies.forEach((enemy) => {
     if (enemy.deathTimer <= 0 && enemy.isDead) {
-      removeEnemy(index);
+      removeEnemy(enemy.id);
     }
   });
 }

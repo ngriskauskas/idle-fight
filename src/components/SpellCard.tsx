@@ -51,7 +51,10 @@ function PhysicalSpellCard({
   const statsToUse = caster.statusStats;
   const spell = spellBase as PhysicalSpell;
 
-  const totalDamage = spell.damage.total + Math.floor(caster.attack.total);
+  // same formula as createPhysicalAttack: the spell adds only its share of attack
+  const totalDamage = Math.round(
+    spell.damage.total + caster.attack.total * (spell.attackScale ?? 1),
+  );
   const totalCritChance = caster.critChance.total + spell.critChance.total;
   const totalCritMultiplier = caster.critMultiplier.total + spell.critMultiplier.total - 1;
   const critDamage = Math.floor(
@@ -105,7 +108,7 @@ function PhysicalSpellCard({
       </div>
 
       <ProgressBar
-        current={spell.attackCost.current}
+        current={Math.min(spell.attackCost.current, spell.attackCost.total)}
         max={spell.attackCost.total}
         label=""
         colorClass={colorClass}
@@ -186,7 +189,7 @@ function MagicSpellCard({
       </div>
 
       <ProgressBar
-        current={spell.attackCost.current}
+        current={Math.min(spell.attackCost.current, spell.attackCost.total)}
         max={spell.attackCost.total}
         label=""
         colorClass={colorClass}
@@ -222,7 +225,7 @@ function AuraSpellCard({
       </div>
 
       <ProgressBar
-        current={spell.attackCost.current}
+        current={Math.min(spell.attackCost.current, spell.attackCost.total)}
         max={spell.attackCost.total}
         label=""
         colorClass={colorClass}

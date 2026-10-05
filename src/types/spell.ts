@@ -8,6 +8,8 @@ export interface PhysicalSpell extends Spell {
   critChance: CombatStat;
   critMultiplier: CombatStat;
   damage: CombatStat;
+  // share of the caster's attack added to each hit (1 when omitted). Slow spells get more.
+  attackScale?: number;
   statusStats: Partial<{
     poison: CombatStat;
     bleed: CombatStat;

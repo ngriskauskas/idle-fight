@@ -7,16 +7,11 @@ interface TriggersDisplayProps {
   size?: "sm" | "md";
 }
 
-export function TriggersDisplay({
-  triggers,
-  size = "md",
-}: TriggersDisplayProps) {
+export function TriggersDisplay({ triggers, size = "md" }: TriggersDisplayProps) {
   if (!triggers || triggers.length === 0) return null;
 
   return (
-    <div
-      className={`flex flex-col gap-1 ${size === "sm" ? "text-xs" : "text-sm"}`}
-    >
+    <div className={`flex flex-col gap-1 ${size === "sm" ? "text-xs" : "text-sm"}`}>
       {triggers.map((trigger) => (
         <div key={trigger.id} className="flex items-center gap-2">
           <span className="font-bold text-blue-400">
@@ -26,6 +21,7 @@ export function TriggersDisplay({
           <span className="font-bold text-green-400">
             {TRIGGER_ACTION_LABELS[trigger.action] || trigger.action}
           </span>
+          {trigger.status && <span className="text-orange-300 capitalize">{trigger.status}</span>}
           {trigger.chance !== undefined && (
             <span className="text-yellow-300 ml-2">{trigger.chance}%</span>
           )}
@@ -34,9 +30,7 @@ export function TriggersDisplay({
           )}
           {trigger.spell && (
             <Tooltip content={<SpellTooltip spell={trigger.spell} />}>
-              <span className="text-purple-300 ml-2 underline ">
-                {trigger.spell.name}
-              </span>
+              <span className="text-purple-300 ml-2 underline ">{trigger.spell.name}</span>
             </Tooltip>
           )}
         </div>
@@ -56,6 +50,7 @@ const TRIGGER_TYPE_LABELS: Record<TriggerType, string> = {
   onFullMana: "On Full Mana",
   tickTrigger: "Aura Per Tick",
   onDeath: "On Enemy Death",
+  onBleedChange: "On Bleed Change",
 };
 
 const TRIGGER_ACTION_LABELS: Record<TriggerAction, string> = {
@@ -66,4 +61,16 @@ const TRIGGER_ACTION_LABELS: Record<TriggerAction, string> = {
   castAuraAll: "Cast Aura All",
   poisonAoe: "Poison AoE",
   poisonSpread: "Poison Spread",
+  multiplyPoison: "Multiply Poison",
+  healForBleedStacks: "Heal per Bleed",
+  minusDefensePerBleedStack: "-Defense per Bleed",
+  applyStatus: "Apply",
+  applyStatusSelf: "Apply to Self",
+  applyStatusAoe: "Apply to All Enemies",
+  multiplyStatus: "Multiply",
+  spreadStatus: "Spread to Others",
+  shatterStatus: "Shatter (Damage per Stack)",
+  healPerOwnStatus: "Heal per Own Stack",
+  gainShield: "Gain Shield",
+  gainMana: "Gain Mana",
 };

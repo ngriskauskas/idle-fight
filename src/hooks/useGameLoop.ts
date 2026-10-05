@@ -5,6 +5,17 @@ import { tickRespawn } from "../logic/characterActions";
 import { tickEnemyDeathTimers } from "../logic/enemyActions";
 import { Character } from "../types";
 
+export function fastTick() {
+  tickSpells();
+  tickEnemyDeathTimers();
+}
+
+export function slowTick() {
+  tickStatusEffects();
+  tickAuraEffects();
+  tickRegen();
+}
+
 export function useGameLoop() {
   const character = useGameStore(
     (state) => state.friends.find((f) => f.isMainCharacter)!,
@@ -14,8 +25,7 @@ export function useGameLoop() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isPaused && character.currentRespawnTime === 0) {
-        tickSpells();
-        tickEnemyDeathTimers();
+        fastTick();
       }
     }, 100);
     return () => clearInterval(interval);
@@ -24,9 +34,7 @@ export function useGameLoop() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isPaused && character.currentRespawnTime === 0) {
-        tickStatusEffects();
-        tickAuraEffects();
-        tickRegen();
+        slowTick();
       }
     }, 1000);
     return () => clearInterval(interval);

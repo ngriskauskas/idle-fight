@@ -52,11 +52,13 @@ import { GiFrostfire } from "react-icons/gi";
 import { GiBoltSpellCast } from "react-icons/gi";
 import { MdElectricBolt } from "react-icons/md";
 import { GiArmoredPants } from "react-icons/gi";
+import { GiBlood } from "react-icons/gi";
 
 export const ICON_MAP: Record<
   string,
   React.ComponentType<{ size?: string | number; color?: string }>
 > = {
+  blood: GiBlood,
   pants: GiArmoredPants,
   bolt: MdElectricBolt,
   handSpell: GiBoltSpellCast,

@@ -1,15 +1,22 @@
+const SUFFIXES = ["", "K", "M", "B", "T"];
+
+// 987, 1.2K, 34.5M ... and scientific notation only past trillions
 export function formatNumber(val: number): string {
-  if (Math.abs(val) >= 1000) {
-    // 1 decimal, remove trailing 0, remove '+' in exponent
-    let exp = val.toExponential(1).replace(/\+/, "");
-    // Remove trailing .0 if present
-    exp = exp.replace(/\.0+e/, "e");
-    return exp;
+  const abs = Math.abs(val);
+  if (abs >= 1000) {
+    let tier = Math.floor(Math.log10(abs) / 3);
+    // 999,999 would round up to "1000K": move it to the next suffix
+    if (Math.round(abs / Math.pow(1000, tier)) >= 1000) tier += 1;
+    if (tier >= SUFFIXES.length) {
+      return val.toExponential(1).replace(/\+/, "").replace(/\.0+e/, "e");
+    }
+    const scaled = val / Math.pow(1000, tier);
+    const digits = Math.abs(scaled) >= 100 ? 0 : 1;
+    return scaled.toFixed(digits).replace(/\.0$/, "") + SUFFIXES[tier];
   }
   if (Number.isInteger(val)) return val.toString();
-  // Truncate to 2 decimals, remove trailing zeros
-  let truncated = Math.trunc(val * 100) / 100;
-  return truncated.toString();
+  // one decimal below 1000, so a fractional stat never shows a long tail
+  return (Math.round(val * 10) / 10).toString();
 }
 
 export function formatPercent(val: number): string {

@@ -52,22 +52,25 @@ auras:
 
 talents:
 
-- epidemic, (maybe aura or talent) when enemy dies with poison stacks they spread to next enemy
-- talent, reduce enemy damage for each poison stack
-- on crit, multiply poison stacks by 1.2 or so
-- venomous entrance, on enemy spawn apply poison stacks to ALL CHARACTERS (including yourself)
+-- epidemic, (maybe aura or talent) when enemy dies with poison stacks they spread to next enemy
+
+-- on crit, multiply poison stacks by 1.2 or so
+-- venomous entrance, on enemy spawn apply poison stacks to ALL CHARACTERS (including yourself)
+
 - on take poison damage, heal instead
+- talent, reduce enemy damage for each poison stack
 
 ## Bleed
 
 attack spells:
 
-- low damage plus bleed,
-- some kind of bleed aoe attack, slow
+-- low damage plus bleed,
+-- some kind of bleed aoe attack, slow
 
 auras:
 
-- marrow drinker, scale health regen off bleed stacks
+-- marrow drinker, scale health regen off bleed stacks
+
 - cast on enemy, reduce defense per bleed stack
 
 talents:

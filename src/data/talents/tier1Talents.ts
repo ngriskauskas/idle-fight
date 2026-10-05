@@ -11,7 +11,8 @@ export const WARRIOR_TRAINING: Talent = {
   tier: 1,
   category: "attack",
   effects: [
-    { type: "damage", value: 3, valueType: "flat", priority: "normal" },
+    { type: "damage", value: 2, valueType: "flat", priority: "normal" },
+    { type: "damage", value: 15, valueType: "percentage", priority: "normal" },
   ],
 };
 
@@ -27,6 +28,7 @@ export const IRON_CONSTITUTION: Talent = {
   category: "utility",
   effects: [
     { type: "health", value: 6, valueType: "flat", priority: "normal" },
+    { type: "health", value: 10, valueType: "percentage", priority: "normal" },
   ],
 };
 
@@ -42,6 +44,7 @@ export const STONE_WALL: Talent = {
   category: "defense",
   effects: [
     { type: "defense", value: 2, valueType: "flat", priority: "normal" },
+    { type: "defense", value: 10, valueType: "percentage", priority: "normal" },
   ],
 };
 
@@ -70,6 +73,7 @@ export const ARCANE_AFFINITY: Talent = {
   category: "utility",
   effects: [
     { type: "manaCost", value: 3, valueType: "flat", priority: "normal" },
+    { type: "manaCost", value: 10, valueType: "percentage", priority: "normal" },
   ],
 };
 
@@ -85,6 +89,7 @@ export const REGENERATION: Talent = {
   category: "utility",
   effects: [
     { type: "healthRegen", value: 2, valueType: "flat", priority: "normal" },
+    { type: "healthRegen", value: 10, valueType: "percentage", priority: "normal" },
   ],
 };
 
@@ -99,7 +104,8 @@ export const MANA_EFFICIENCY: Talent = {
   tier: 1,
   category: "utility",
   effects: [
-    { type: "manaRegen", value: 2, valueType: "flat", priority: "normal" },
+    { type: "manaRegen", value: 3, valueType: "flat", priority: "normal" },
+    { type: "manaRegen", value: 10, valueType: "percentage", priority: "normal" },
   ],
 };
 
@@ -114,6 +120,8 @@ export const SHIELD_BEARER: Talent = {
   tier: 1,
   category: "defense",
   effects: [
-    { type: "shield", value: 3, valueType: "flat", priority: "normal" },
+    { type: "shield", value: 5, valueType: "flat", priority: "normal" },
+    { type: "shieldRegen", value: 0.5, valueType: "flat", priority: "normal" },
+    { type: "shield", value: 10, valueType: "percentage", priority: "normal" },
   ],
 };

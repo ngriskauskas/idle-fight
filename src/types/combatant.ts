@@ -37,6 +37,7 @@ export interface Combatant {
   statusStats: StatusStats;
   auraEffects: AuraEffect[];
   spells: Spell[];
+  speedBoostCooldown?: number;
   appliedEffects: Record<EffectType, ActiveEffect[]>;
   triggers: Record<TriggerType, Trigger[]>;
 }

@@ -21,7 +21,7 @@ const WEAPONS: ItemTemplate[] = [
       { type: "damage", value: 5, valueType: "flat", priority: "normal" },
       {
         type: "critMultiplier",
-        value: 50,
+        value: 30,
         valueType: "flat",
         priority: "normal",
       },
@@ -56,7 +56,7 @@ const WEAPONS: ItemTemplate[] = [
     slot: "weapon",
     itemEffects: [
       { type: "mana", value: 15, valueType: "flat", priority: "normal" },
-      { type: "manaRegen", value: 1, valueType: "flat", priority: "normal" },
+      { type: "manaRegen", value: 0.5, valueType: "flat", priority: "normal" },
       { type: "speed", value: 1, valueType: "flat", priority: "normal" },
     ],
   },
@@ -67,7 +67,7 @@ const WEAPONS: ItemTemplate[] = [
     slot: "weapon",
     itemEffects: [
       { type: "mana", value: 25, valueType: "flat", priority: "normal" },
-      { type: "manaRegen", value: 2, valueType: "flat", priority: "normal" },
+      { type: "manaRegen", value: 1, valueType: "flat", priority: "normal" },
       { type: "manaLeech", value: 3, valueType: "flat", priority: "normal" },
     ],
   },
@@ -111,7 +111,7 @@ const WEAPONS: ItemTemplate[] = [
     itemEffects: [
       { type: "defense", value: 2, valueType: "flat", priority: "normal" },
       { type: "shield", value: 8, valueType: "flat", priority: "normal" },
-      { type: "shieldRegen", value: 2, valueType: "flat", priority: "normal" },
+      { type: "shieldRegen", value: 1, valueType: "flat", priority: "normal" },
       { type: "mana", value: 10, valueType: "flat", priority: "normal" },
     ],
   },
@@ -127,13 +127,14 @@ const ARMOR: ItemTemplate[] = [
     itemEffects: [
       { type: "defense", value: 5, valueType: "flat", priority: "normal" },
       { type: "health", value: 10, valueType: "flat", priority: "normal" },
+      { type: "speed", value: -2, valueType: "flat", priority: "normal" },
     ],
     triggers: [
       {
         id: "plate-armor-speed-boost-on-hit",
         type: "onHit",
         action: "speedBoost",
-        value: 30,
+        value: 6,
       },
     ],
   },
@@ -173,7 +174,7 @@ const ARMOR: ItemTemplate[] = [
     itemEffects: [
       { type: "defense", value: 6, valueType: "flat", priority: "normal" },
       { type: "health", value: 15, valueType: "flat", priority: "normal" },
-      { type: "fire", value: 2, valueType: "flat", priority: "normal" },
+      { type: "fire", value: 1, valueType: "flat", priority: "normal" },
     ],
   },
 ];
@@ -269,7 +270,7 @@ const BOOTS: ItemTemplate[] = [
     itemEffects: [
       { type: "speed", value: 2, valueType: "flat", priority: "normal" },
       { type: "mana", value: 10, valueType: "flat", priority: "normal" },
-      { type: "manaRegen", value: 1, valueType: "flat", priority: "normal" },
+      { type: "manaRegen", value: 0.5, valueType: "flat", priority: "normal" },
       { type: "manaCost", value: 3, valueType: "flat", priority: "normal" },
     ],
   },
@@ -302,7 +303,7 @@ const RINGS: ItemTemplate[] = [
     slot: "ring",
     itemEffects: [
       { type: "health", value: 5, valueType: "flat", priority: "normal" },
-      { type: "healthRegen", value: 1, valueType: "flat", priority: "normal" },
+      { type: "healthRegen", value: 0.5, valueType: "flat", priority: "normal" },
     ],
   },
   {
@@ -322,7 +323,7 @@ const RINGS: ItemTemplate[] = [
     slot: "ring",
     itemEffects: [
       { type: "mana", value: 8, valueType: "flat", priority: "normal" },
-      { type: "manaRegen", value: 1, valueType: "flat", priority: "normal" },
+      { type: "manaRegen", value: 0.5, valueType: "flat", priority: "normal" },
       { type: "manaCost", value: 2, valueType: "flat", priority: "normal" },
     ],
   },
@@ -332,8 +333,8 @@ const RINGS: ItemTemplate[] = [
     icon: "ring",
     slot: "ring",
     itemEffects: [
-      { type: "poison", value: 2, valueType: "flat", priority: "normal" },
-      { type: "bleed", value: 1, valueType: "flat", priority: "normal" },
+      { type: "poison", value: 1, valueType: "flat", priority: "normal" },
+      { type: "bleed", value: 0.5, valueType: "flat", priority: "normal" },
     ],
   },
   {
@@ -342,9 +343,9 @@ const RINGS: ItemTemplate[] = [
     icon: "ring",
     slot: "ring",
     itemEffects: [
-      { type: "fire", value: 1.5, valueType: "flat", priority: "normal" },
+      { type: "fire", value: 0.75, valueType: "flat", priority: "normal" },
       { type: "ice", value: 1.5, valueType: "flat", priority: "normal" },
-      { type: "lightning", value: 1.5, valueType: "flat", priority: "normal" },
+      { type: "lightning", value: 0.75, valueType: "flat", priority: "normal" },
     ],
   },
 ];
@@ -358,7 +359,7 @@ const AMULETS: ItemTemplate[] = [
     slot: "amulet",
     itemEffects: [
       { type: "health", value: 8, valueType: "flat", priority: "normal" },
-      { type: "healthRegen", value: 2, valueType: "flat", priority: "normal" },
+      { type: "healthRegen", value: 1, valueType: "flat", priority: "normal" },
     ],
   },
   {
@@ -368,7 +369,7 @@ const AMULETS: ItemTemplate[] = [
     slot: "amulet",
     itemEffects: [
       { type: "mana", value: 15, valueType: "flat", priority: "normal" },
-      { type: "manaRegen", value: 2, valueType: "flat", priority: "normal" },
+      { type: "manaRegen", value: 1, valueType: "flat", priority: "normal" },
       { type: "manaCost", value: 7, valueType: "flat", priority: "normal" },
     ],
   },
@@ -404,7 +405,7 @@ const AMULETS: ItemTemplate[] = [
     slot: "amulet",
     itemEffects: [
       { type: "shield", value: 8, valueType: "flat", priority: "normal" },
-      { type: "shieldRegen", value: 2, valueType: "flat", priority: "normal" },
+      { type: "shieldRegen", value: 1, valueType: "flat", priority: "normal" },
     ],
   },
   {
@@ -413,9 +414,9 @@ const AMULETS: ItemTemplate[] = [
     icon: "gemNecklace",
     slot: "amulet",
     itemEffects: [
-      { type: "poison", value: 1, valueType: "flat", priority: "normal" },
-      { type: "bleed", value: 1, valueType: "flat", priority: "normal" },
-      { type: "fire", value: 1, valueType: "flat", priority: "normal" },
+      { type: "poison", value: 0.5, valueType: "flat", priority: "normal" },
+      { type: "bleed", value: 0.5, valueType: "flat", priority: "normal" },
+      { type: "fire", value: 0.5, valueType: "flat", priority: "normal" },
     ],
   },
 ];

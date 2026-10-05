@@ -1,5 +1,5 @@
 import { Talent } from "../../types";
-import { HEALTH_REGEN } from "../spells/auras";
+import { HEALTH_REGEN, WAR_CRY } from "../spells/auras";
 
 export const ARCANE_OVERLOAD: Talent = {
   id: "arcane-overload",
@@ -23,15 +23,12 @@ export const ARCANE_OVERLOAD: Talent = {
         description: "Dramatically increase your speed until you are hit.",
         icon: "bolt",
         spellType: "aura",
-        damage: { base: 0, total: 0, current: 0 },
         attackCost: { base: 0, total: 0, current: 0 },
         unlockCost: 0,
         unlocked: true,
-        critChance: { base: 0, total: 0, current: 0 },
-        critMultiplier: { base: 1, total: 1, current: 1 },
         manaCost: { base: 0, total: 0, current: 0 },
         isAoe: false,
-        statusStats: {},
+        isSelfTargeted: true,
         auraEffect: {
           id: "overcharge-inline",
           name: "Overcharge",
@@ -93,7 +90,6 @@ export const BLOOD_PACT: Talent = {
         unlocked: true,
         critChance: { base: 0.05, total: 0.05, current: 0.05 },
         critMultiplier: { base: 2.2, total: 2.2, current: 2.2 },
-        manaCost: { base: 0, total: 0, current: 0 },
         isAoe: false,
         statusStats: {
           bleed: { base: 20, total: 20, current: 20 },
@@ -187,7 +183,7 @@ export const BLOOD_RUSH: Talent = {
   tier: 3,
   category: "speed",
   effects: [
-    { type: "healthRegen", value: -10, valueType: "flat", priority: "set" },
+    { type: "healthRegen", value: 0, valueType: "flat", priority: "set" },
     {
       type: "healthLeech",
       value: 10,
@@ -226,15 +222,12 @@ export const STASIS_SURVIVAL: Talent = {
         description: "No one can attack while this aura is active.",
         icon: "pause",
         spellType: "aura",
-        damage: { base: 0, total: 0, current: 0 },
         attackCost: { base: 0, total: 0, current: 0 },
         unlockCost: 0,
         unlocked: true,
-        critChance: { base: 0, total: 0, current: 0 },
-        critMultiplier: { base: 1, total: 1, current: 1 },
         manaCost: { base: 0, total: 0, current: 0 },
         isAoe: true,
-        statusStats: {},
+        isSelfTargeted: true,
         auraEffect: {
           id: "stasis-aura-inline",
           name: "Stasis",
@@ -265,4 +258,155 @@ export const STASIS_SURVIVAL: Talent = {
       },
     },
   ],
+};
+
+export const SHATTER: Talent = {
+  id: "shatter",
+  name: "Shatter",
+  description: "Crits consume all ice on your target, dealing 3 damage per stack. Ends the slow.",
+  icon: "💎",
+  unlocked: false,
+  level: 0,
+  maxLevel: 1,
+  cost: 2,
+  tier: 3,
+  category: "status",
+  effects: [],
+  triggers: [
+    {
+      id: "shatter-ice",
+      type: "onCrit",
+      action: "shatterStatus",
+      status: "ice",
+      value: 3,
+    },
+  ],
+};
+
+export const TOXIC_BLOOD: Talent = {
+  id: "toxic-blood",
+  name: "Toxic Blood",
+  description: "Poison on you heals more than it hurts. Poison yourself on purpose.",
+  icon: "🧪",
+  unlocked: false,
+  level: 0,
+  maxLevel: 1,
+  cost: 2,
+  tier: 3,
+  category: "status",
+  effects: [],
+  triggers: [
+    {
+      id: "toxic-blood-heal",
+      type: "tickTrigger",
+      action: "healPerOwnStatus",
+      status: "poison",
+      value: 2,
+    },
+  ],
+};
+
+export const BATTLE_TRANCE: Talent = {
+  id: "battle-trance",
+  name: "Battle Trance",
+  description: "Hits have a chance to grant a stack of War Cry. Fast attacks stack it quickly.",
+  icon: "🥁",
+  unlocked: false,
+  level: 0,
+  maxLevel: 1,
+  cost: 2,
+  tier: 3,
+  category: "attack",
+  effects: [],
+  triggers: [
+    {
+      id: "battle-trance-war-cry",
+      type: "onHit",
+      action: "castAura",
+      chance: 15,
+      spell: WAR_CRY,
+    },
+  ],
+};
+
+export const BLOODLETTING: Talent = {
+  id: "bloodletting",
+  name: "Bloodletting",
+  description: "Losing health makes you bleed, but pushes all your attacks forward.",
+  icon: "🗡️",
+  unlocked: false,
+  level: 0,
+  maxLevel: 1,
+  cost: 2,
+  tier: 3,
+  category: "speed",
+  effects: [],
+  triggers: [
+    {
+      id: "bloodletting-bleed",
+      type: "onTakeDamage",
+      action: "applyStatusSelf",
+      status: "bleed",
+      value: 2,
+    },
+    {
+      id: "bloodletting-speed",
+      type: "onTakeDamage",
+      action: "speedBoost",
+      value: 15,
+    },
+  ],
+};
+
+export const SPIKED_SHIELD: Talent = {
+  id: "spiked-shield",
+  name: "Spiked Shield",
+  description: "Every attack against you is answered with a Riposte. Best when you can afford to be hit.",
+  icon: "🔱",
+  unlocked: false,
+  level: 0,
+  maxLevel: 1,
+  cost: 2,
+  tier: 3,
+  category: "defense",
+  effects: [],
+  triggers: [
+    {
+      id: "spiked-shield-riposte",
+      type: "onTakeAttack",
+      action: "castSpell",
+      spell: {
+        id: "riposte-inline",
+        name: "Riposte",
+        description: "Strike back at your attacker.",
+        icon: "bigShield",
+        spellType: "physical",
+        damage: { base: 2, total: 2, current: 2 },
+        attackCost: { base: 0, total: 0, current: 0 },
+        unlockCost: 0,
+        unlocked: true,
+        critChance: { base: 0, total: 0, current: 0 },
+        critMultiplier: { base: 1.5, total: 1.5, current: 1.5 },
+        isAoe: false,
+        statusStats: {},
+      },
+    },
+  ],
+};
+
+export const SPLIT_MIND: Talent = {
+  id: "split-mind",
+  name: "Split Mind",
+  description:
+    "Needs level 14. One more spell slot. Pays off with on-hit and on-kill talents, which every extra spell feeds.",
+  icon: "🧠",
+  unlocked: false,
+  level: 0,
+  maxLevel: 1,
+  cost: 4,
+  tier: 3,
+  category: "utility",
+  requiredLevel: 14,
+  spellSlots: 1,
+  effects: [],
 };

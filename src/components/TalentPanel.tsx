@@ -13,6 +13,9 @@ interface TooltipPos {
 export function TalentPanel() {
   const talents = useGameStore((state) => state.talents);
   const availablePoints = useGameStore((state) => state.talentPoints);
+  const characterLevel = useGameStore(
+    (state) => state.friends.find((f) => f.id === "main")?.level ?? 1,
+  );
   const [tooltipPos, setTooltipPos] = useState<TooltipPos | null>(null);
 
   const getTalentColor = (category: string): string => {
@@ -58,7 +61,7 @@ export function TalentPanel() {
   );
 
   const totalPoints = useMemo(
-    () => talents.reduce((sum, t) => sum + t.level, 0),
+    () => talents.reduce((sum, t) => sum + t.level * t.cost, 0),
     [talents],
   );
 
@@ -96,7 +99,7 @@ export function TalentPanel() {
                 </h3>
                 {getPointsToUnlock(tier) > 0 && (
                   <span className="text-xs text-yellow-400">
-                    {getPointsToUnlock(tier)} points to unlock
+                    {getPointsToUnlock(tier)} {getPointsToUnlock(tier) === 1 ? "point" : "points"} to unlock
                   </span>
                 )}
               </div>
@@ -104,7 +107,8 @@ export function TalentPanel() {
               {/* Tier Talents Grid */}
               <div className="grid grid-cols-4 gap-2">
                 {tierTalents.map((talent) => {
-                  const isTierLocked = getPointsToUnlock(tier) > 0;
+                  const isTierLocked =
+                    getPointsToUnlock(tier) > 0 || characterLevel < (talent.requiredLevel ?? 0);
                   return (
                     <div
                       key={talent.id}
@@ -171,6 +175,11 @@ export function TalentPanel() {
             <div className="font-bold text-sm text-white">
               {getHoveredTalent()?.name}
             </div>
+            {getHoveredTalent()?.description && (
+              <div className="mt-1 text-xs text-gray-300">
+                {getHoveredTalent()!.description}
+              </div>
+            )}
             {getHoveredTalent()?.triggers &&
               getHoveredTalent()!.triggers!.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-slate-700">

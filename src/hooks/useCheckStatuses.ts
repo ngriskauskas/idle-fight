@@ -3,6 +3,7 @@ import { useGameStore } from "../store/gameStore";
 import { AttackStatusStats, StatusEffect, StatusEffectType } from "../types";
 import { statusEffectMap } from "../logic/statusActions";
 import { getCombatant } from "../utils/getCombatant";
+import { callTriggers } from "../logic/triggerActions";
 
 export function useCheckStatuses() {
   const combatantStatuses = useGameStore((state) => [
@@ -13,7 +14,9 @@ export function useCheckStatuses() {
   useEffect(() => {
     combatantStatuses.forEach(({ combatantId, statusEffects }) => {
       statusEffects.forEach((status) => {
-        runStatusEffect(status, combatantId);
+        // damage is dealt once a second in tickStatusEffects; only the slow follows stacks live
+        if (status.type === "ice") runStatusEffect(status, combatantId);
+        callTriggers("onBleedChange", combatantId);
       });
       useGameStore.setState((state) => {
         const combatant = getCombatant(combatantId, state);

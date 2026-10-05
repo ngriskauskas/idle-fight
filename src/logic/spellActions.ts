@@ -1,6 +1,7 @@
 import { removeCharacterAuraEffect } from "../hooks/useCheckAuraEffects";
 import { useGameStore } from "../store/gameStore";
-import { AuraSpell } from "../types";
+import { AuraSpell, Character } from "../types";
+import { getCombatant } from "../utils/getCombatant";
 
 export const spellActions = {
   unlockSpell: (spellId: string) => {
@@ -18,15 +19,16 @@ export const spellActions = {
 
     useGameStore.setState((state) => {
       const spell = state.spells.find((s) => s.id === spellId)!;
+      const character = getCombatant("main", state)! as Character;
 
-      if (state.character.spells.length >= state.character.spellCount) {
-        const removedSpell = state.character.spells.pop();
+      if (character.spells.length >= character.spellCount) {
+        const removedSpell = character.spells.pop();
         if (removedSpell && removedSpell.spellType === "aura") {
           auraIdToRemove = (removedSpell as AuraSpell).auraEffect.id;
         }
       }
 
-      state.character.spells.push(spell);
+      character.spells.push(spell);
     });
 
     if (auraIdToRemove) {
@@ -38,13 +40,14 @@ export const spellActions = {
     let auraIdToRemove: string | null = null;
 
     useGameStore.setState((state) => {
-      const spell = state.character.spells.find((s) => s.id === spellId);
+      const character = getCombatant("main", state)! as Character;
+      const spell = character.spells.find((s) => s.id === spellId);
 
       if (spell && spell.spellType === "aura") {
         auraIdToRemove = (spell as AuraSpell).auraEffect.id;
       }
 
-      state.character.spells = state.character.spells.filter((spell) => spell.id !== spellId);
+      character.spells = character.spells.filter((spell) => spell.id !== spellId);
     });
 
     if (auraIdToRemove) {

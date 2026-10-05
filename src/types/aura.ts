@@ -11,6 +11,8 @@ export interface AuraEffect {
   totalTime: number;
   stacks: number;
   scaling?: number;
+  maxStacks?: number;
   isFragile?: boolean;
   tickTriggers?: Trigger[];
+  triggers?: Trigger[];
 }

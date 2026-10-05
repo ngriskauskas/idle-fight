@@ -55,12 +55,14 @@ export function ProgressionBar() {
       <div className="mt-2">
         <div className="flex justify-between mb-1 text-xs text-gray-400">
           <span>Progress to Next World</span>
-          <span>{progress.world} / 10</span>
+          <span>Wave {progress.wave} / 10</span>
         </div>
         <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden border border-slate-600">
           <div
             className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300"
-            style={{ width: `${(progress.world / 10) * 100}%` }}
+            style={{
+              width: `${(((progress.wave - 1) * 10 + progress.enemy - 1) / 100) * 100}%`,
+            }}
           />
         </div>
       </div>

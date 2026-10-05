@@ -28,16 +28,18 @@ export function recalculateCombatStatTotal(
   });
 
   const percentageEffects = activeEffects.filter((ae) => ae.effect.valueType === "percentage");
-  let totalPercentChange = 0;
+  // bonuses add together; each penalty multiplies, so a -50% always costs half
+  let bonusPercent = 0;
+  let penaltyMulti = 1;
   percentageEffects.forEach((ae) => {
-    totalPercentChange += ae.effect.value;
+    if (ae.effect.value >= 0) bonusPercent += ae.effect.value;
+    else penaltyMulti *= Math.max(0, 1 + ae.effect.value / 100);
   });
 
-  if (totalPercentChange !== 0) {
-    total +=
-      effectType === "critMultiplier"
-        ? (total * totalPercentChange) / 100
-        : Math.trunc((total * totalPercentChange) / 100);
+  // a negative total (a slowed character's speed) is left alone: a bonus must not deepen it
+  if (total > 0 && (bonusPercent !== 0 || penaltyMulti !== 1)) {
+    const scaled = total * (1 + bonusPercent / 100) * penaltyMulti;
+    total = effectType === "critMultiplier" ? scaled : Math.trunc(scaled);
   }
 
   const setMin = combatant.appliedEffects[effectType]
@@ -73,10 +75,12 @@ export function getEffectMap(combatant: Combatant): Record<string, EffectApplier
       useGameStore.setState((state) => {
         const target = getCombatant(combatant.id, state);
         if (!target) return;
-        const newval = recalculateCombatStatTotal(target, target.maxHealth, "health");
-        target.health.total = newval < 1 ? 1 : newval;
-        target.maxHealth.total = newval < 1 ? 1 : newval;
-        target.health.current = Math.min(target.health.current, target.health.total);
+        const newval = Math.max(1, recalculateCombatStatTotal(target, target.maxHealth, "health"));
+        // gaining max health gives that health; losing it only clamps
+        const gained = Math.max(0, newval - target.maxHealth.total);
+        target.health.total = newval;
+        target.maxHealth.total = newval;
+        target.health.current = Math.min(newval, target.health.current + gained);
       });
     },
     shield: () => {
@@ -84,8 +88,11 @@ export function getEffectMap(combatant: Combatant): Record<string, EffectApplier
         const target = getCombatant(combatant.id, state);
         if (!target) return;
         const newTotal = recalculateCombatStatTotal(target, target.maxShield, "shield");
-        target.shield.current = newTotal;
+        // gaining max shield gives that much shield; losing it only clamps. Refilling here
+        // would turn every recast of a shield aura into a full shield heal.
+        const gained = Math.max(0, newTotal - target.maxShield.total);
         target.maxShield.total = newTotal;
+        target.shield.current = Math.max(0, Math.min(newTotal, target.shield.current + gained));
       });
     },
     speed: () => {

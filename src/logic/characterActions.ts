@@ -2,14 +2,27 @@ import { useGameStore } from "../store/gameStore";
 import { resetEnemies } from "./enemyActions";
 import { logKill } from "./logActions";
 import { resetProgression } from "./progressionActions";
-import { removeEffect } from "./effectActions";
+import { removeAllAuraEffects } from "../hooks/useCheckAuraEffects";
 import { getCombatant } from "../utils/getCombatant";
-import { Character } from "../types";
+import { Character, Talent } from "../types";
+
+const BASE_SPELL_SLOTS = 2;
+const SPELL_SLOT_LEVELS = [3, 6, 10, 15];
+
+export function getSpellCount(level: number, talents: Talent[] = []): number {
+  const fromLevels = BASE_SPELL_SLOTS + SPELL_SLOT_LEVELS.filter((l) => level >= l).length;
+  const fromTalents = talents.reduce((sum, t) => sum + (t.spellSlots ?? 0) * t.level, 0);
+  return fromLevels + fromTalents;
+}
 
 export function levelUpCharacter(): void {
   useGameStore.setState((state) => {
     const character = getCombatant("main", state) as Character;
     character.level += 1;
+    character.spellCount = Math.max(
+      character.spellCount,
+      getSpellCount(character.level, state.talents),
+    );
     character.experience = 0;
     character.experienceNeeded *= 2;
     state.talentPoints += 1;
@@ -56,13 +69,7 @@ export function killCharacter(): void {
 }
 
 export function respawnCharacter(): void {
-  const character = getCombatant("main", useGameStore.getState()) as Character;
-  const auraEffects = character.auraEffects;
-  auraEffects.forEach((aura) => {
-    aura.effects.forEach((effect) =>
-      removeEffect(character, effect, `aura-${aura.id}-effect${effect.type}`),
-    );
-  });
+  removeAllAuraEffects("main");
 
   useGameStore.setState((state) => {
     const characterState = getCombatant("main", state) as Character;
@@ -74,7 +81,6 @@ export function respawnCharacter(): void {
       spell.attackCost.current = 0;
     });
     characterState.statusEffects = [];
-    characterState.auraEffects = [];
     characterState.speed.current = characterState.speed.total;
     characterState.isDead = false;
   });

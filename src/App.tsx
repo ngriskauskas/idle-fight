@@ -5,29 +5,13 @@ import { ProgressionBar } from "./components/ProgressionBar";
 import { PauseWidget } from "./components/PauseWidget";
 import { DebugPanel } from "./components/DebugPanel";
 import { Sidebar } from "./components/Sidebar";
-import { useCheckHealth } from "./hooks/useCheckHealth";
-import {
-  useRecalcCharacterSpells,
-  useRecalcSpellCosts,
-  useRecalcSpellSpeeds,
-} from "./hooks/useRecalcCombatant";
-import { useCheckMana } from "./hooks/useCheckMana";
-import { useCheckCastSpell } from "./hooks/useCheckCastSpell";
-import { useCheckAuraEffects } from "./hooks/useCheckAuraEffects";
-import { useCheckStatuses } from "./hooks/useCheckStatuses";
+import { useCombatEngine } from "./hooks/useCombatEngine";
 import { FriendSection } from "./components/FriendSection";
 
 function App() {
   useSaveSystem();
   useGameLoop();
-  useCheckHealth();
-  useCheckMana();
-  useRecalcCharacterSpells();
-  useRecalcSpellCosts();
-  useRecalcSpellSpeeds();
-  useCheckCastSpell();
-  useCheckAuraEffects();
-  useCheckStatuses();
+  useCombatEngine();
 
   return (
     <div className="min-h-screen h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white flex flex-col">

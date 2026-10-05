@@ -1,4 +1,4 @@
-import { StatusEffect } from "../old/utils/combatCalculations";
+import { StatusEffect } from "../types";
 
 interface StatusEffectDisplayProps {
   effects: StatusEffect[];
@@ -32,16 +32,18 @@ export function StatusEffectDisplay({ effects }: StatusEffectDisplayProps) {
 
   return (
     <div className="flex gap-2 flex-wrap mt-2">
-      {effects.map((effect, idx) => (
-        <div
-          key={idx}
-          className={`${getEffectColor(
-            effect.type
-          )} text-white px-2 py-1 rounded text-sm font-semibold`}
-        >
-          {getEffectLabel(effect.type)} x{effect.stacks}
-        </div>
-      ))}
+      {effects
+        .filter((effect) => effect.stacks > 0)
+        .map((effect, idx) => (
+          <div
+            key={idx}
+            className={`${getEffectColor(
+              effect.type,
+            )} text-white px-2 py-1 rounded text-sm font-semibold`}
+          >
+            {getEffectLabel(effect.type)} x{effect.stacks}
+          </div>
+        ))}
     </div>
   );
 }

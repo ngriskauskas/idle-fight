@@ -1,13 +1,30 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useGameStore } from "../store/gameStore";
 import { unlockTalent } from "../logic/talentActions";
 import { EffectsDisplay } from "./EffectsDisplay";
 import { TriggersDisplay } from "./TriggersDisplay";
+import { Tooltip } from "./Tooltip";
+import type { Talent } from "../types/talent";
 
-interface TooltipPos {
-  x: number;
-  y: number;
-  talentId: string;
+function TalentTooltip({ talent }: { talent: Talent }) {
+  return (
+    <div className="bg-slate-900 border-2 border-slate-600 rounded p-3 w-64 max-w-full shadow-lg">
+      <div className="font-bold text-sm text-white">{talent.name}</div>
+      {talent.description && (
+        <div className="mt-1 text-xs text-gray-300">{talent.description}</div>
+      )}
+      {talent.triggers && talent.triggers.length > 0 && (
+        <div className="mt-2 pt-2 border-t border-slate-700">
+          <TriggersDisplay triggers={talent.triggers} size="sm" />
+        </div>
+      )}
+      {talent.effects && talent.effects.length > 0 && (
+        <div className="mt-2 pt-2 border-t border-slate-600">
+          <EffectsDisplay effects={talent.effects} size="sm" />
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function TalentPanel() {
@@ -16,7 +33,6 @@ export function TalentPanel() {
   const characterLevel = useGameStore(
     (state) => state.friends.find((f) => f.id === "main")?.level ?? 1,
   );
-  const [tooltipPos, setTooltipPos] = useState<TooltipPos | null>(null);
 
   const getTalentColor = (category: string): string => {
     switch (category) {
@@ -31,23 +47,6 @@ export function TalentPanel() {
       default:
         return "border-slate-500 bg-slate-900 hover:bg-slate-800";
     }
-  };
-
-  const handleMouseEnter = (
-    talentId: string,
-    e: React.MouseEvent<HTMLDivElement>,
-  ) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setTooltipPos({
-      talentId,
-      x: rect.left,
-      y: rect.top,
-    });
-  };
-
-  const getHoveredTalent = () => {
-    if (!tooltipPos) return null;
-    return talents.find((t) => t.id === tooltipPos.talentId);
   };
 
   const getTierTalents = useMemo(
@@ -74,7 +73,7 @@ export function TalentPanel() {
   );
 
   return (
-    <div className="bg-slate-700 rounded-lg p-4 border border-slate-600 h-full flex flex-col">
+    <div className="bg-slate-700 rounded-lg p-3 lg:p-4 border border-slate-600 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Talents</h2>
         <div className="flex items-center gap-2">
@@ -105,16 +104,14 @@ export function TalentPanel() {
               </div>
 
               {/* Tier Talents Grid */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-4 gap-2">
                 {tierTalents.map((talent) => {
                   const isTierLocked =
                     getPointsToUnlock(tier) > 0 || characterLevel < (talent.requiredLevel ?? 0);
+                  const cannotUnlock =
+                    isTierLocked || (!talent.unlocked && availablePoints < talent.cost);
                   return (
-                    <div
-                      key={talent.id}
-                      onMouseEnter={(e) => handleMouseEnter(talent.id, e)}
-                      onMouseLeave={() => setTooltipPos(null)}
-                    >
+                    <Tooltip key={talent.id} content={<TalentTooltip talent={talent} />}>
                       {/* Talent Square */}
                       <button
                         onClick={() => {
@@ -122,22 +119,15 @@ export function TalentPanel() {
                             unlockTalent(talent.id);
                           }
                         }}
-                        disabled={
-                          isTierLocked ||
-                          (!talent.unlocked && availablePoints < talent.cost)
-                        }
+                        // aria-disabled rather than disabled, so a tap still opens the tooltip
+                        aria-disabled={cannotUnlock}
                         className={`w-16 h-18 rounded border-2 flex flex-col items-center justify-between transition p-1 ${getTalentColor(talent.category || "attack")} ${
                           isTierLocked
                             ? "opacity-20"
                             : talent.unlocked
                               ? "opacity-100"
                               : "opacity-50"
-                        } ${
-                          isTierLocked ||
-                          (!talent.unlocked && availablePoints < talent.cost)
-                            ? "cursor-not-allowed"
-                            : "cursor-pointer"
-                        }`}
+                        } ${cannotUnlock ? "cursor-not-allowed" : "cursor-pointer"}`}
                       >
                         {/* Icon */}
                         <div className="text-2xl">{talent.icon}</div>
@@ -153,7 +143,7 @@ export function TalentPanel() {
                           Cost: {talent.cost}
                         </div>
                       </button>
-                    </div>
+                    </Tooltip>
                   );
                 })}
               </div>
@@ -161,46 +151,6 @@ export function TalentPanel() {
           );
         })}
       </div>
-
-      {/* Tooltip */}
-      {tooltipPos && getHoveredTalent() && (
-        <div
-          className="fixed z-50 pointer-events-none"
-          style={{
-            left: `${tooltipPos.x - 200}px`,
-            top: `${tooltipPos.y - 30}px`,
-          }}
-        >
-          <div className="bg-slate-900 border-2 border-slate-600 rounded p-3 w-64 shadow-lg">
-            <div className="font-bold text-sm text-white">
-              {getHoveredTalent()?.name}
-            </div>
-            {getHoveredTalent()?.description && (
-              <div className="mt-1 text-xs text-gray-300">
-                {getHoveredTalent()!.description}
-              </div>
-            )}
-            {getHoveredTalent()?.triggers &&
-              getHoveredTalent()!.triggers!.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-slate-700">
-                  <TriggersDisplay
-                    triggers={getHoveredTalent()!.triggers!}
-                    size="sm"
-                  />
-                </div>
-              )}
-            {getHoveredTalent()?.effects &&
-              getHoveredTalent()!.effects.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-slate-600">
-                  <EffectsDisplay
-                    effects={getHoveredTalent()!.effects}
-                    size="sm"
-                  />
-                </div>
-              )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

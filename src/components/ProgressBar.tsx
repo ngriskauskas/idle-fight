@@ -33,10 +33,10 @@ export function ProgressBar({
   }[size];
 
   return (
-    <div className="mb-4 mt-4">
+    <div className="my-2 sm:my-4">
       <div className={`flex items-center ${label ? "gap-2" : ""}`}>
-        {label && <span className="w-16 text-sm">{label}</span>}
-        <div className={label ? "flex-1" : "w-full"}>
+        {label && <span className="w-10 sm:w-16 flex-shrink-0 text-xs sm:text-sm">{label}</span>}
+        <div className={label ? "flex-1 min-w-0" : "w-full"}>
           <div
             className={`relative w-full bg-slate-800 rounded-full overflow-hidden border border-slate-600 ${heightClass}`}
           >
@@ -52,7 +52,7 @@ export function ProgressBar({
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <span
-                className={`font-bold text-white drop-shadow ${textSizeClass}`}
+                className={`font-bold text-white drop-shadow whitespace-nowrap ${textSizeClass}`}
               >
                 {formatNumber(current)} / {formatNumber(max)}
               </span>

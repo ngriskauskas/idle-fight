@@ -6,7 +6,7 @@ export function PauseWidget() {
   const showDebugPanel = useGameStore((state) => state.showDebugPanel);
 
   return (
-    <div className="flex items-center justify-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600">
+    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 p-2 sm:p-4 bg-slate-800 rounded-lg border border-slate-600">
       <div
         className={`px-3 py-1 rounded font-semibold text-sm ${
           isPaused

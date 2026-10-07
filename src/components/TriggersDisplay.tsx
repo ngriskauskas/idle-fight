@@ -13,7 +13,7 @@ export function TriggersDisplay({ triggers, size = "md" }: TriggersDisplayProps)
   return (
     <div className={`flex flex-col gap-1 ${size === "sm" ? "text-xs" : "text-sm"}`}>
       {triggers.map((trigger) => (
-        <div key={trigger.id} className="flex items-center gap-2">
+        <div key={trigger.id} className="flex flex-wrap items-center gap-x-2">
           <span className="font-bold text-blue-400">
             {TRIGGER_TYPE_LABELS[trigger.type] || trigger.type}
           </span>

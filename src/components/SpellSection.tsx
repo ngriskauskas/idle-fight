@@ -45,8 +45,8 @@ function CompactSpellRow({ spell, colorClass }: { spell: Spell; colorClass: stri
   return (
     <div className="flex items-center gap-2 bg-slate-800 rounded px-2 py-1">
       <span className="w-4 flex-shrink-0">{Icon ? <Icon size={16} color="#fff" /> : null}</span>
-      <span className="w-28 text-xs font-semibold truncate">{spell.name}</span>
-      <div className="flex-1 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-600">
+      <span className="flex-1 min-w-0 sm:flex-none sm:w-28 text-xs font-semibold truncate">{spell.name}</span>
+      <div className="w-10 sm:w-auto sm:flex-1 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-600">
         <div
           className={`h-full transition-all duration-100 ${colorClass}`}
           style={{ width: `${percentage}%` }}
@@ -62,12 +62,15 @@ export function SpellSection({
   caster,
   slots,
 }: SpellSectionProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  // on a phone the full spell cards push the fight off screen, so start compact
+  const [collapsed, setCollapsed] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches,
+  );
   const slotUnlocked = useSlotUnlocked(slots?.total);
   const freeSlots = slots ? Math.max(0, slots.total - spells.length) : 0;
 
   return (
-    <div className="mt-6">
+    <div className="mt-3 sm:mt-6">
       {slots && (
         <button
           onClick={() => setCollapsed((c) => !c)}

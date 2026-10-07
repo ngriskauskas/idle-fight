@@ -48,9 +48,9 @@ export function DebugPanel() {
 
   return (
     <div className="bg-red-900 border-2 border-red-600 rounded-lg p-3 mb-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="text-sm font-bold text-red-200">DEBUG MODE</div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={handleLevelUp}
             className="px-3 py-1 bg-red-700 hover:bg-red-600 text-red-100 font-bold text-sm rounded transition"
@@ -77,7 +77,7 @@ export function DebugPanel() {
           </button>
         </div>
       </div>
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <label className="text-xs text-red-200">Enemy:</label>
         <input
           type="number"

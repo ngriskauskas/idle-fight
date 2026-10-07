@@ -45,7 +45,7 @@ export function SpellPanel() {
   const spellTypeOrder = ["aura", "physical", "magic"];
 
   return (
-    <div className="bg-slate-700 rounded-lg p-4 border border-slate-600 h-full flex flex-col">
+    <div className="bg-slate-700 rounded-lg p-3 lg:p-4 border border-slate-600 h-full flex flex-col">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-bold">Spells</h2>
         <div className="text-sm font-bold text-blue-300">Points: {spellPoints}</div>
@@ -98,7 +98,7 @@ export function SpellPanel() {
       </div>
 
       {/* Spells by Type */}
-      <div className="overflow-y-auto flex-1 pr-2 space-y-4">
+      <div className="overflow-y-auto flex-1 min-h-[12rem] pr-2 space-y-4">
         {spellTypeOrder.map((type) => {
           const spells = spellsByType[type];
           if (!spells || spells.length === 0) return null;
@@ -108,7 +108,7 @@ export function SpellPanel() {
               <h3 className={`text-sm font-bold ${getSpellTypeColor(type)} mb-2`}>
                 {getSpellTypeName(type)}
               </h3>
-              <div className="grid grid-cols-4 gap-2 p-2">
+              <div className="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-4 gap-2 p-1 sm:p-2">
                 {spells.map((spell) => {
                   const isEquipped = equippedSpells.some((s) => s.id === spell.id);
                   const isUnlocked = spell.unlocked;

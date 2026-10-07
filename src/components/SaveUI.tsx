@@ -74,7 +74,7 @@ export function SaveUI() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 w-80 shadow-xl">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 w-80 max-w-[calc(100vw-2rem)] shadow-xl">
             <h2 className="text-lg font-bold text-white mb-4">Game Save</h2>
 
             <div className="mb-6 p-3 bg-slate-900 rounded">

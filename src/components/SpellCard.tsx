@@ -27,10 +27,10 @@ function SpellHeader({ spell }: { spell: Spell }) {
 
   return (
     <div className="mb-2 flex items-center gap-2">
-      <span className="text-xl">{Icon ? <Icon size={24} color="#fff" /> : null}</span>
-      <div className="flex-1 flex items-center gap-2">
-        <span className="font-semibold text-base">{spell.name}</span>
-        <span className={`text-xs px-2 py-1 rounded ${typeColors.text}`}>
+      <span className="text-xl flex-shrink-0">{Icon ? <Icon size={24} color="#fff" /> : null}</span>
+      <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2">
+        <span className="min-w-0 break-words hyphens-auto font-semibold text-sm sm:text-base">{spell.name}</span>
+        <span className={`text-xs sm:px-2 sm:py-1 rounded ${typeColors.text}`}>
           {spell.spellType.charAt(0).toUpperCase() + spell.spellType.slice(1)}
         </span>
       </div>
@@ -63,24 +63,24 @@ function PhysicalSpellCard({
   const typeColors = getSpellTypeColor(spell.spellType);
 
   return (
-    <div className={`bg-slate-800 rounded p-3 border-2 ${typeColors.border}`}>
+    <div className={`bg-slate-800 rounded p-2 sm:p-3 border-2 ${typeColors.border}`}>
       <SpellHeader spell={spell} />
 
       <div className="mb-2 space-y-1 text-xs bg-slate-900 rounded p-2">
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-2">
           <span className="text-gray-300">Damage:</span>
           <span className="font-bold text-orange-400">{formatNumber(totalDamage)}</span>
         </div>
         <div className="mt-1 pt-1 border-t border-slate-700 text-xxs space-y-0.5">
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2">
             <span className="text-gray-400">Crit Chance:</span>
             <span className="font-bold text-yellow-400">{(totalCritChance * 100).toFixed(1)}%</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2">
             <span className="text-gray-400">Crit Multiplier:</span>
             <span className="font-bold text-yellow-400">{totalCritMultiplier.toFixed(2)}x</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2">
             <span className="text-gray-400">Crit Damage:</span>
             <span className="font-bold text-amber-400">{formatNumber(critDamage)}</span>
           </div>
@@ -88,7 +88,7 @@ function PhysicalSpellCard({
         {(spell.statusStats || Object.values(statsToUse).some((v) => v.total > 0)) && (
           <div className="mt-1 pt-1 border-t border-slate-700 space-y-1">
             {(spell.statusStats?.poison?.total || 0) + statsToUse.poison.total > 0 ? (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-purple-400">Poison:</span>
                 <span className="font-bold">
                   {(spell.statusStats?.poison?.total || 0) + statsToUse.poison.total}
@@ -96,7 +96,7 @@ function PhysicalSpellCard({
               </div>
             ) : null}
             {(spell.statusStats?.bleed?.total || 0) + statsToUse.bleed.total > 0 ? (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-red-400">Bleed:</span>
                 <span className="font-bold">
                   {(spell.statusStats?.bleed?.total || 0) + statsToUse.bleed.total}
@@ -136,24 +136,24 @@ function MagicSpellCard({
   const typeColors = getSpellTypeColor(spell.spellType);
 
   return (
-    <div className={`bg-slate-800 rounded p-3 border-2 ${typeColors.border}`}>
+    <div className={`bg-slate-800 rounded p-2 sm:p-3 border-2 ${typeColors.border}`}>
       <SpellHeader spell={spell} />
 
       <div className="mb-2 space-y-1 text-xs bg-slate-900 rounded p-2">
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-2">
           <span className="text-gray-300">Damage:</span>
           <span className="font-bold text-orange-400">{formatNumber(totalDamage)}</span>
         </div>
         <div className="mt-1 pt-1 border-t border-slate-700 text-xxs space-y-0.5">
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2">
             <span className="text-gray-400">Crit Chance:</span>
             <span className="font-bold text-yellow-400">{(totalCritChance * 100).toFixed(1)}%</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2">
             <span className="text-gray-400">Crit Multiplier:</span>
             <span className="font-bold text-yellow-400">{totalCritMultiplier.toFixed(2)}x</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2">
             <span className="text-gray-400">Crit Damage:</span>
             <span className="font-bold text-amber-400">{formatNumber(critDamage)}</span>
           </div>
@@ -161,7 +161,7 @@ function MagicSpellCard({
         {(spell.statusStats || Object.values(statsToUse).some((v) => v.total > 0)) && (
           <div className="mt-1 pt-1 border-t border-slate-700 space-y-1">
             {(spell.statusStats?.fire?.total || 0) + statsToUse.fire.total > 0 ? (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-orange-400">Fire:</span>
                 <span className="font-bold">
                   {(spell.statusStats?.fire?.total || 0) + statsToUse.fire.total}
@@ -169,7 +169,7 @@ function MagicSpellCard({
               </div>
             ) : null}
             {(spell.statusStats?.ice?.total || 0) + statsToUse.ice.total > 0 ? (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-cyan-400">Ice:</span>
                 <span className="font-bold">
                   {(spell.statusStats?.ice?.total || 0) + statsToUse.ice.total}
@@ -177,7 +177,7 @@ function MagicSpellCard({
               </div>
             ) : null}
             {(spell.statusStats?.lightning?.total || 0) + statsToUse.lightning.total > 0 ? (
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-yellow-400">Lightning:</span>
                 <span className="font-bold">
                   {(spell.statusStats?.lightning?.total || 0) + statsToUse.lightning.total}
@@ -208,7 +208,7 @@ function AuraSpellCard({
   const typeColors = getSpellTypeColor(spell.spellType);
 
   return (
-    <div className={`bg-slate-800 rounded p-3 border-2 ${typeColors.border}`}>
+    <div className={`bg-slate-800 rounded p-2 sm:p-3 border-2 ${typeColors.border}`}>
       <SpellHeader spell={spell} />
 
       <div className="mb-2 space-y-1 text-xs bg-slate-900 rounded p-2">

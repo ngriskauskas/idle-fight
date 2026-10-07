@@ -30,7 +30,7 @@ function DamageLogEntry({ log }: { log: DamageLog }) {
     <div className="bg-gray-700 rounded p-1 text-sm border border-gray-600">
       <div className="flex justify-between items-start gap-3">
         <div className="flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-2">
             <SourceIcon size={16} color="#06b6d4" />
             <span className="text-cyan-400 font-semibold">{sourceName}</span>
             <span className="text-gray-400">used</span>

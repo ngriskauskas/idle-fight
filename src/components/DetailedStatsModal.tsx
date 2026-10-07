@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import type { Character, Combatant, CombatStat, EffectType } from "../types";
 import { ICON_MAP } from "../data/iconMap";
 import { Tooltip } from "./Tooltip";
@@ -57,7 +58,7 @@ function StatLine({
               ? `${ae.effect.value > 0 ? "+" : ""}${(ae.effect.value / 100) * 100}%`
               : `${ae.effect.value > 0 ? "+" : ""}${format(ae.effect.value)}`;
         return (
-          <div key={ae.id} className="flex justify-between">
+          <div key={ae.id} className="flex justify-between gap-2">
             <span className={getTypeColor(ae.type)}>
               {ae.type.charAt(0).toUpperCase() + ae.type.slice(1)}: {ae.name}
             </span>
@@ -67,7 +68,7 @@ function StatLine({
       })}
 
       {percentageEffects.map((ae) => (
-        <div key={ae.id} className="flex justify-between">
+        <div key={ae.id} className="flex justify-between gap-2">
           <span className={getTypeColor(ae.type)}>
             {ae.type.charAt(0).toUpperCase() + ae.type.slice(1)}: {ae.name}
           </span>
@@ -91,7 +92,7 @@ function StatLine({
 
   return (
     <Tooltip content={tooltipContent}>
-      <div className="border border-slate-700 rounded mb-2 px-3 py-2 flex justify-between items-center text-sm hover:bg-slate-700">
+      <div className="border border-slate-700 rounded mb-2 px-3 py-2 flex justify-between items-center gap-2 text-sm hover:bg-slate-700">
         <span>{label}</span>
         <span className="font-mono font-bold">{format(stat.total)}</span>
       </div>
@@ -116,20 +117,21 @@ export function DetailedStatsModal({
   const percentFormat = formatPercent;
   const Icon = ICON_MAP[combatant.icon as keyof typeof ICON_MAP];
 
-  return (
+  // portalled to body: the cards animate with transforms, which would trap a fixed child
+  return createPortal(
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center z-50 p-2 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="bg-slate-800 rounded-lg p-6 border-2 border-slate-600 max-w-6xl max-h-[95vh] overflow-y-auto"
+        className="bg-slate-800 rounded-lg p-4 sm:p-6 border-2 border-slate-600 w-full sm:w-auto max-w-6xl max-h-full overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-4 sm:mb-8">
           <div className="flex items-center gap-3">
             {Icon && <Icon size={40} color="#fff" />}
             <div>
-              <h2 className="text-3xl font-bold text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">
                 {combatant.name}
               </h2>
               <p className="text-sm text-gray-400">Level {combatant.level}</p>
@@ -137,13 +139,13 @@ export function DetailedStatsModal({
           </div>
           <button
             onClick={onClose}
-            className="text-xl text-gray-400 hover:text-white transition"
+            className="text-xl p-2 text-gray-400 hover:text-white transition"
           >
             ✕
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 sm:gap-y-6">
           {/* Combat Stats */}
           <div>
             <h3 className="text-lg font-bold text-cyan-400 mb-3">Combat</h3>
@@ -276,11 +278,11 @@ export function DetailedStatsModal({
           )}
 
           {/* Status Stats */}
-          <div className="col-span-3">
+          <div className="col-span-full">
             <h3 className="text-lg font-bold text-red-400 mb-3">
               Status Effects
             </h3>
-            <div className="grid grid-cols-5 gap-2 mb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-2 mb-3">
               <StatLine
                 label="Poison"
                 stat={combatant.statusStats.poison}
@@ -332,6 +334,7 @@ export function DetailedStatsModal({
             </div>
           )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

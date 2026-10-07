@@ -4,10 +4,10 @@ export function ProgressionBar() {
   const progress = useGameStore((state) => state.progress);
 
   return (
-    <div className="bg-slate-800 rounded-lg p-2 border border-slate-600 mb-6">
-      <div className="flex justify-between items-start gap-4">
+    <div className="bg-slate-800 rounded-lg p-2 border border-slate-600 mb-2 sm:mb-6">
+      <div className="flex flex-wrap justify-between items-start gap-x-4 gap-y-1">
         <div className="space-y-1">
-          <div className="flex gap-6">
+          <div className="flex gap-4 sm:gap-6">
             <div>
               <p className="text-gray-400 text-xs">Enemy</p>
               <p className="text-lg font-bold text-cyan-400">
@@ -29,7 +29,7 @@ export function ProgressionBar() {
           </div>
         </div>
 
-        <div className="flex gap-6 items-start">
+        <div className="flex gap-4 sm:gap-6 items-start">
           <div>
             <p className="text-gray-500 text-xs">Highest Enemy</p>
             <p className="text-lg font-bold text-cyan-300">

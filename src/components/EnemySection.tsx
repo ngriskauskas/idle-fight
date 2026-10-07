@@ -31,9 +31,9 @@ export function EnemySection() {
   }, [enemies.map((e) => e.id).join(",")]);
 
   return (
-    <div className="flex-1 relative">
+    <div className="flex-1 min-w-0 relative">
       {enemies.length > 0 ? (
-        <div className="grid grid-cols-2 gap-4 enemy-grid-anim">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(15rem,100%),1fr))] gap-2 sm:gap-4 enemy-grid-anim">
           {enemies.map((enemy) => (
             <div
               key={enemy.id}
@@ -48,7 +48,7 @@ export function EnemySection() {
           ))}
         </div>
       ) : (
-        <div className="bg-slate-700 rounded-lg p-6 border border-slate-600 text-center">
+        <div className="bg-slate-700 rounded-lg p-3 sm:p-6 border border-slate-600 text-center">
           <p className="text-gray-300">
             All enemies defeated! Spawn a new one.
           </p>

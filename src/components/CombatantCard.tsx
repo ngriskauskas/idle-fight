@@ -27,9 +27,9 @@ export function CombatantCard({ combatant }: CombatantCardProps) {
       : "border-green-600";
 
   return (
-    <div className={`relative bg-slate-700 rounded-lg p-4 border ${borderClass}`}>
+    <div className={`relative bg-slate-700 rounded-lg p-2 sm:p-4 border ${borderClass}`}>
       <CombatLogAnimation combatant={combatant} />
-      <h3 className="text-xl font-bold mb-3 text-center flex items-center justify-center gap-2">
+      <h3 className="text-base sm:text-xl font-bold mb-3 text-center flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
         {combatant.isMainCharacter ? (
           <span>Character</span>
         ) : (
@@ -38,10 +38,10 @@ export function CombatantCard({ combatant }: CombatantCardProps) {
             <span>{combatant.name}</span>
           </>
         )}
-        <span className="text-sm font-normal text-gray-400 ml-2">Lvl {combatant.level}</span>
+        <span className="text-sm font-normal text-gray-400 sm:ml-2">Lvl {combatant.level}</span>
         <button
           onClick={() => setShowStatsModal(true)}
-          className="ml-2 px-2 py-1 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-cyan-400 transition"
+          className="sm:ml-2 px-2 py-1 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-cyan-400 transition"
           title="View detailed stats"
         >
           Stats
@@ -67,8 +67,8 @@ export function CombatantCard({ combatant }: CombatantCardProps) {
 
       {/* Rewards Display */}
       {combatant.isEnemy && (
-        <div className="bg-slate-600 rounded p-3 mb-4 text-xs space-y-1">
-          <div className="text-yellow-300 flex justify-between">
+        <div className="bg-slate-600 rounded p-2 sm:p-3 mb-4 text-xs space-y-1">
+          <div className="text-yellow-300 flex flex-wrap justify-between gap-x-2">
             <span className="font-semibold">XP Reward</span>
             <span>
               {formatNumber((combatant as Enemy).xpReward)} ×{" "}
@@ -78,7 +78,7 @@ export function CombatantCard({ combatant }: CombatantCardProps) {
               )}
             </span>
           </div>
-          <div className="text-blue-300 flex justify-between">
+          <div className="text-blue-300 flex flex-wrap justify-between gap-x-2">
             <span className="font-semibold">Drop Rate</span>
             <span>+{(combatant as Enemy).itemDropRateBonus}%</span>
           </div>
@@ -116,7 +116,7 @@ export function CombatantCard({ combatant }: CombatantCardProps) {
 
       {/* Character-specific: Respawn Timer */}
       {combatant.isMainCharacter && (combatant as Character).currentRespawnTime > 0 && (
-        <div className="mt-4 p-4 bg-red-900 border-2 border-red-500 rounded">
+        <div className="mt-4 p-2 sm:p-4 bg-red-900 border-2 border-red-500 rounded">
           <p className="text-red-400 font-bold text-center mb-3">
             Respawning in {(combatant as Character).currentRespawnTime}s
           </p>

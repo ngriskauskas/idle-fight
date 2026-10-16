@@ -4,7 +4,6 @@ import { useSaveSystem } from "./hooks/useSaveSystem";
 import { EnemySection } from "./components/EnemySection";
 import { ProgressionBar } from "./components/ProgressionBar";
 import { PauseWidget } from "./components/PauseWidget";
-import { DebugPanel } from "./components/DebugPanel";
 import { Sidebar } from "./components/Sidebar";
 import { useCombatEngine } from "./hooks/useCombatEngine";
 import { FriendSection } from "./components/FriendSection";
@@ -23,8 +22,6 @@ function App() {
           className={`${showFight ? "" : "hidden"} lg:block flex-1 min-h-0 min-w-0 p-2 sm:p-4 overflow-y-auto`}
         >
           <div className="max-w-6xl">
-            <DebugPanel />
-
             <div className="flex flex-col sm:flex-row sm:gap-4 sm:items-start">
               <div className="sm:flex-1 sm:min-w-0">
                 <ProgressionBar />

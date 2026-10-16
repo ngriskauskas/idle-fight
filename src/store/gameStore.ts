@@ -31,7 +31,6 @@ export interface GameState {
   spellPoints: number;
 
   isPaused: boolean;
-  showDebugPanel: boolean;
   animationQueue: AnimationOccurrence[];
 }
 
@@ -227,7 +226,6 @@ export const useGameStore = create<GameState>()(
       },
 
       isPaused: false,
-      showDebugPanel: false,
       animationQueue: [],
     }),
   ),

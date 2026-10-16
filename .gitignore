@@ -26,3 +26,6 @@ dist-ssr
 # Playtest harness
 playtest/.build
 playtest/runs
+
+# itch.io upload bundle
+*-itch.zip

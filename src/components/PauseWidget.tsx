@@ -3,7 +3,6 @@ import { uiActions } from "../logic/uiActions";
 
 export function PauseWidget() {
   const isPaused = useGameStore((state) => state.isPaused);
-  const showDebugPanel = useGameStore((state) => state.showDebugPanel);
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 p-2 sm:p-4 bg-slate-800 rounded-lg border border-slate-600">
@@ -26,21 +25,6 @@ export function PauseWidget() {
         }`}
       >
         {isPaused ? "▶ Resume" : "⏸ Pause"}
-      </button>
-
-      <button
-        onClick={() =>
-          useGameStore.setState((state) => {
-            state.showDebugPanel = !state.showDebugPanel;
-          })
-        }
-        className={`px-4 py-2 rounded font-bold transition ${
-          showDebugPanel
-            ? "bg-yellow-600 hover:bg-yellow-500 text-white"
-            : "bg-gray-600 hover:bg-gray-500 text-white"
-        }`}
-      >
-        Debug
       </button>
     </div>
   );

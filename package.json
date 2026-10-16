@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "package:itch": "npm run build && rm -f idle-fight-itch.zip && cd dist && zip -qr ../idle-fight-itch.zip .",
     "preview": "vite preview",
     "playtest": "node playtest/playtest.mjs"
   },

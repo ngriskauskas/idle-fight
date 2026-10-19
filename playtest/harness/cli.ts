@@ -4,7 +4,18 @@ import { spellActions } from "../../src/logic/spellActions";
 import { unlockTalent } from "../../src/logic/talentActions";
 import { equipItem, grantItem, removeItem, unequipItem } from "../../src/logic/itemActions";
 import { ITEM_TEMPLATES } from "../../src/data/itemData";
+import {
+  buyItem,
+  getBuyPrice,
+  getRerollCost,
+  getSellValue,
+  rerollShop,
+  sellItems,
+  toggleHoldItem,
+  smithItems,
+} from "../../src/logic/shopActions";
 import { UNIQUE_ITEMS } from "../../src/data/uniqueItemData";
+import { SHOP_ITEMS } from "../../src/data/shopItemData";
 import { BOSSES } from "../../src/data/bossData";
 import { DEFAULT_ENEMIES } from "../../src/data/enemyData";
 import type {
@@ -215,8 +226,12 @@ function printStatus(run: RunFile) {
   Object.entries(c.equippedSlots).forEach(([slot, item]) => {
     out(`  ${slot}: ${item ? fmtItem(item) : "-"}`);
   });
-  out(`inventory (${c.items.length}):`);
-  c.items.forEach((item) => out(`  ${fmtItem(item)}`));
+  out(`inventory (${c.items.length}), gold ${state.gold}:`);
+  c.items.forEach((item) => out(`  ${fmtItem(item)} (sells for ${getSellValue(item)})`));
+  out(`shop (restocks in ${state.shop.restockIn}s, restock now for ${getRerollCost()}):`);
+  state.shop.items.forEach((item) =>
+    out(`  ${fmtItem(item)} (costs ${getBuyPrice(item)})${item.id === state.shop.heldId ? " HELD" : ""}`),
+  );
   out(`enemies now: ${state.enemies.map((e) => `${e.name} L${e.level} ${e.health.current}/${e.maxHealth.total}hp`).join(", ")}`);
 }
 
@@ -284,7 +299,7 @@ function cmdAct(run: RunFile, rawArgs: string[]) {
   const [action, a, b] = args;
   const state = getState();
   const c = character();
-  const before = JSON.stringify([state.talentPoints, state.spellPoints, c.spells.map((s) => s.id), c.equippedSlots, c.items.length]);
+  const before = JSON.stringify([state.talentPoints, state.spellPoints, c.spells.map((s) => s.id), c.equippedSlots, c.items.length, state.gold, state.shop.heldId]);
 
   if (action === "talent") {
     const talent = state.talents.find((t) => t.id === a) ?? fail(`unknown talent "${a}"`);
@@ -319,14 +334,33 @@ function cmdAct(run: RunFile, rawArgs: string[]) {
   } else if (action === "discard-item") {
     if (!c.items.some((i) => i.id === a)) fail(`no item "${a}" in inventory`);
     removeItem(a);
+  } else if (action === "sell-item") {
+    const ids = args.slice(1);
+    const missing = ids.filter((id) => !c.items.some((i) => i.id === id));
+    if (!ids.length || missing.length) fail(`not in inventory: ${missing.join(" ") || "(no ids given)"}`);
+    out(`sold ${ids.length} for ${sellItems(ids)} gold`);
+  } else if (action === "buy-item") {
+    const item = state.shop.items.find((i) => i.id === a) ?? fail(`no item "${a}" in the shop`);
+    if (state.gold < getBuyPrice(item)) fail(`${a} costs ${getBuyPrice(item)}, you have ${state.gold} gold`);
+    buyItem(a);
+  } else if (action === "hold-item") {
+    if (!state.shop.items.some((i) => i.id === a)) fail(`no item "${a}" in the shop`);
+    toggleHoldItem(a);
+    out(getState().shop.heldId === a ? `holding ${a} through restocks` : `let go of ${a}`);
+  } else if (action === "restock-shop") {
+    if (state.gold < getRerollCost()) fail(`a restock costs ${getRerollCost()}, you have ${state.gold} gold`);
+    rerollShop();
+  } else if (action === "smith") {
+    const result = smithItems(args.slice(1)) ?? fail("smith needs 4 inventory item ids of one rarity below unique");
+    out(`forged ${fmtItem(result)}`);
   } else {
-    fail("actions: talent <id> | unlock-spell <id> | equip-spell <id> | unequip-spell <id> | equip-item <itemId> [slot] | unequip-item <slot> | discard-item <itemId>");
+    fail("actions: talent <id> | unlock-spell <id> | equip-spell <id> | unequip-spell <id> | equip-item <itemId> [slot] | unequip-item <slot> | discard-item <itemId> | sell-item <itemId...> | buy-item <itemId> | hold-item <itemId> | restock-shop | smith <itemId x4>");
   }
 
   flush();
   const after = getState();
   const ca = character();
-  const changed = before !== JSON.stringify([after.talentPoints, after.spellPoints, ca.spells.map((s) => s.id), ca.equippedSlots, ca.items.length]);
+  const changed = before !== JSON.stringify([after.talentPoints, after.spellPoints, ca.spells.map((s) => s.id), ca.equippedSlots, ca.items.length, after.gold, after.shop.heldId]);
   if (!changed && action !== "talent") fail("the action had no effect");
   run.actions.push({ t: gameSeconds(run), event: args.join(" ") });
   out(`ok: ${args.join(" ")}`);
@@ -358,8 +392,8 @@ function cmdQa(run: RunFile, args: string[]) {
   const [what, a, b] = args;
   if (what === "items") {
     out("ITEM TEMPLATES (id | slot | effects | triggers)");
-    [...ITEM_TEMPLATES, ...UNIQUE_ITEMS].forEach((t) => {
-      const unique = UNIQUE_ITEMS.includes(t) ? " | UNIQUE" : "";
+    [...ITEM_TEMPLATES, ...UNIQUE_ITEMS, ...SHOP_ITEMS].forEach((t) => {
+      const unique = SHOP_ITEMS.includes(t) ? " | MERCHANT-ONLY UNIQUE" : UNIQUE_ITEMS.includes(t) ? " | UNIQUE" : "";
       const triggers = t.triggers?.length ? ` | ${t.triggers.map(fmtTrigger).join(", ")}` : "";
       out(`${t.id} | ${t.slot}${unique} | ${t.itemEffects.map(fmtEffect).join(", ")}${triggers}`);
     });
@@ -425,6 +459,8 @@ const USAGE = `usage: npm run playtest -- <command>
                                  advance game time (default 600s). Stops early on level up unless --no-stop
   act <name> <action> ...        talent <id> | unlock-spell <id> | equip-spell <id> | unequip-spell <id>
                                  | equip-item <itemId> [slot] | unequip-item <slot> | discard-item <itemId>
+                                 | sell-item <itemId...> | buy-item <itemId> | hold-item <itemId> | restock-shop
+                                 | smith <itemId> <itemId> <itemId> <itemId>  (4 of one rarity -> 1 of the next)
   summary <name>                 status plus whole-run stats, timeline and every decision made
   qa <name> items | enemies      list every item template, or every enemy and boss
   qa <name> grant-item <templateId> [rarity]

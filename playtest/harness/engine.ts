@@ -175,7 +175,11 @@ export function forkRun(source: RunFile, name: string, seed: number): RunFile {
 
 export function loadRun(run: RunFile) {
   seedRandom(run);
-  store.setState(JSON.parse(JSON.stringify(run.state)), true);
+  const state = JSON.parse(JSON.stringify(run.state));
+  // runs saved before the shop existed
+  state.gold ??= 0;
+  state.shop ??= { items: [], restockIn: 0 };
+  store.setState(state, true);
   flush();
 }
 

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { Character, Enemy, Spell, Talent, Log, Combatant } from "../types";
+import { Character, Enemy, Spell, Talent, Log, Combatant, Item } from "../types";
 import { DEFAULT_SPELLS } from "../data/spells";
 import { DEFAULT_TALENTS } from "../data/talents/index";
 import { AnimationOccurrence } from "../types/animation";
@@ -29,6 +29,9 @@ export interface GameState {
   talents: Talent[];
   talentPoints: number;
   spellPoints: number;
+  gold: number;
+  // the merchant's wares, seconds of play until he restocks, and the ware kept through restocks
+  shop: { items: Item[]; restockIn: number; heldId?: string };
 
   isPaused: boolean;
   animationQueue: AnimationOccurrence[];
@@ -213,6 +216,8 @@ export const useGameStore = create<GameState>()(
       talents: DEFAULT_TALENTS,
       talentPoints: 0,
       spellPoints: 0,
+      gold: 0,
+      shop: { items: [], restockIn: 0 },
 
       progress: {
         enemy: 1,

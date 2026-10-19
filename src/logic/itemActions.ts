@@ -12,6 +12,7 @@ import type {
 import type { ItemTemplate } from "../types/item";
 import { ITEM_TEMPLATES } from "../data/itemData";
 import { UNIQUE_ITEMS } from "../data/uniqueItemData";
+import { SHOP_ITEMS } from "../data/shopItemData";
 import { logItemDrop } from "./logActions";
 import { addEffect, removeEffect } from "./effectActions";
 import { getScaleMulti } from "./progressionActions";
@@ -152,9 +153,17 @@ function getRandomRarity(): ItemRarity {
   return "common";
 }
 
-function getRandomItem(rarity?: ItemRarity) {
+export function hasTemplateFor(rarity: ItemRarity, slot: ItemSlot): boolean {
+  return (rarity === "unique" ? UNIQUE_ITEMS : ITEM_TEMPLATES).some((t) => t.slot === slot);
+}
+
+export function getRandomItem(rarity?: ItemRarity, slot?: ItemSlot) {
   // Use unique items for unique rarity
   const pool = rarity === "unique" ? UNIQUE_ITEMS : ITEM_TEMPLATES;
+  if (slot) {
+    const inSlot = pool.filter((item) => item.slot === slot);
+    if (inSlot.length > 0) return inSlot[Math.floor(Math.random() * inSlot.length)];
+  }
 
   const roll = Math.random() * 100;
   let cumulative = 0;
@@ -176,13 +185,15 @@ function getRandomItem(rarity?: ItemRarity) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function generateItem(
+// Rolls an item. Flat stats grow with `scaleMulti`, the enemy scale it dropped at
+// (the current wave unless given).
+export function generateItem(
   level: number,
-  fixed?: { template: ItemTemplate; rarity: ItemRarity },
+  fixed?: { template?: ItemTemplate; rarity?: ItemRarity; extraSecondaries?: number },
+  scaleMulti: number = getScaleMulti(),
 ): Item {
   const randomRarity = fixed?.rarity ?? getRandomRarity();
   const randomTemplate = fixed?.template ?? getRandomItem(randomRarity);
-  const scaleMulti = getScaleMulti();
   const itemId = `item_${useGameStore.getState().itemIdCounter}`;
 
   useGameStore.setState((state) => {
@@ -210,14 +221,18 @@ function generateItem(
   });
 
   // Generate secondary effects based on rarity
-  const secondaryEffectCount = SECONDARY_EFFECT_COUNT[randomRarity];
+  const secondaryEffectCount =
+    SECONDARY_EFFECT_COUNT[randomRarity] + (fixed?.extraSecondaries ?? 0);
   const secondaryEffects = [];
 
-  for (let i = 0; i < secondaryEffectCount; i++) {
-    const secondaryEffectType =
-      SECONDARY_EFFECTS_BY_SLOT[randomTemplate.slot][
-        Math.floor(Math.random() * SECONDARY_EFFECTS_BY_SLOT[randomTemplate.slot].length)
-      ];
+  // An item applies one secondary per stat (equipItem keys them by type), so each
+  // type is rolled at most once
+  const secondaryPool = [...SECONDARY_EFFECTS_BY_SLOT[randomTemplate.slot]];
+  for (let i = 0; i < secondaryEffectCount && secondaryPool.length > 0; i++) {
+    const secondaryEffectType = secondaryPool.splice(
+      Math.floor(Math.random() * secondaryPool.length),
+      1,
+    )[0];
 
     const isPercentage =
       secondaryEffectType === "critChance" || secondaryEffectType === "itemDropChance"
@@ -249,6 +264,7 @@ function generateItem(
     ...randomTemplate,
     id: itemId,
     level: level,
+    scale: scaleMulti,
     rarity: randomRarity,
     equipped: false,
     mainEffects,
@@ -271,7 +287,7 @@ export function dropItem(enemyLevel: number): void {
 // Put one named item in the inventory, rolled at the current wave like a drop.
 // Returns false for an unknown template. Used by the playtest harness for QA.
 export function grantItem(templateId: string, level: number, rarity?: ItemRarity): boolean {
-  const unique = UNIQUE_ITEMS.find((t) => t.id === templateId);
+  const unique = [...UNIQUE_ITEMS, ...SHOP_ITEMS].find((t) => t.id === templateId);
   const template = unique ?? ITEM_TEMPLATES.find((t) => t.id === templateId);
   if (!template) return false;
   const item = generateItem(level, {

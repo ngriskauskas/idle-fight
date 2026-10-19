@@ -1,6 +1,6 @@
 import type { Effect } from "../types/effect";
 
-const EFFECT_COLORS: Record<string, string> = {
+export const EFFECT_COLORS: Record<string, string> = {
   damage: "text-red-400",
   defense: "text-blue-400",
   health: "text-green-400",
@@ -24,7 +24,7 @@ const EFFECT_COLORS: Record<string, string> = {
   lightning: "text-yellow-300",
 };
 
-const EFFECT_LABELS: Record<string, string> = {
+export const EFFECT_LABELS: Record<string, string> = {
   damage: "Damage",
   defense: "Defense",
   health: "Health",

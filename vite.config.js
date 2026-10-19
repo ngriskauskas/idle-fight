@@ -4,8 +4,8 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(function (_a) {
     var command = _a.command;
     return ({
-        // GitHub Pages serves the site from /idle-fight/
-        base: command === "build" ? "/idle-fight/" : "/",
+        // relative paths, so the build runs from any folder (itch.io serves it from a CDN subpath)
+        base: command === "build" ? "./" : "/",
         plugins: [react()],
         server: {
             port: 5173,

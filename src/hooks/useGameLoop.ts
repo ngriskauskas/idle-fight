@@ -3,6 +3,7 @@ import { useGameStore } from "../store/gameStore";
 import { tickRegen, tickSpells, tickAuraEffects, tickStatusEffects } from "../logic/tickActions";
 import { tickRespawn } from "../logic/characterActions";
 import { tickEnemyDeathTimers } from "../logic/enemyActions";
+import { tickShop } from "../logic/shopActions";
 import { Character } from "../types";
 
 export function fastTick() {
@@ -14,6 +15,7 @@ export function slowTick() {
   tickStatusEffects();
   tickAuraEffects();
   tickRegen();
+  tickShop();
 }
 
 export function useGameLoop() {

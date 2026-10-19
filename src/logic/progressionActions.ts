@@ -10,9 +10,11 @@ const SCALE_JUMP_PER_WORLD = 2;
 // How strong enemies and item drops are at the current wave. Nothing of the player's
 // uses this directly.
 export function getScaleMulti(): number {
-  const state = useGameStore.getState();
-  const wave = state.progress.wave;
-  const world = state.progress.world;
+  const { world, wave } = useGameStore.getState().progress;
+  return getScaleAt(world, wave);
+}
+
+export function getScaleAt(world: number, wave: number): number {
   const totalWave = (world - 1) * 10 + wave;
   return (
     Math.pow(SCALE_GROWTH_PER_WAVE, totalWave - 1) * Math.pow(SCALE_JUMP_PER_WORLD, world - 1)

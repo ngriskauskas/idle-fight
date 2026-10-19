@@ -6,7 +6,24 @@ import { TriggersDisplay } from "./TriggersDisplay";
 import { Tooltip } from "./Tooltip";
 import type { Talent } from "../types/talent";
 
-function TalentTooltip({ talent }: { talent: Talent }) {
+// why a talent can't be taken yet, if anything stops it
+function talentBlocker(
+  talent: Talent,
+  tierPointsNeeded: number,
+  characterLevel: number,
+  availablePoints: number,
+): string | null {
+  if (talent.level >= talent.maxLevel) return null;
+  if (tierPointsNeeded > 0)
+    return `Tier ${talent.tier} opens after ${tierPointsNeeded} more talent ${tierPointsNeeded === 1 ? "point is" : "points are"} spent in lower tiers.`;
+  if (characterLevel < (talent.requiredLevel ?? 0))
+    return `Requires character level ${talent.requiredLevel}.`;
+  if (availablePoints < talent.cost)
+    return `Costs ${talent.cost} talent ${talent.cost === 1 ? "point" : "points"}, you have ${availablePoints}.`;
+  return null;
+}
+
+function TalentTooltip({ talent, blocker }: { talent: Talent; blocker: string | null }) {
   return (
     <div className="bg-slate-900 border-2 border-slate-600 rounded p-3 w-64 max-w-full shadow-lg">
       <div className="font-bold text-sm text-white">{talent.name}</div>
@@ -22,6 +39,9 @@ function TalentTooltip({ talent }: { talent: Talent }) {
         <div className="mt-2 pt-2 border-t border-slate-600">
           <EffectsDisplay effects={talent.effects} size="sm" />
         </div>
+      )}
+      {blocker && (
+        <div className="mt-2 pt-2 border-t border-slate-600 text-xs text-red-400">{blocker}</div>
       )}
     </div>
   );
@@ -111,7 +131,20 @@ export function TalentPanel() {
                   const cannotUnlock =
                     isTierLocked || (!talent.unlocked && availablePoints < talent.cost);
                   return (
-                    <Tooltip key={talent.id} content={<TalentTooltip talent={talent} />}>
+                    <Tooltip
+                      key={talent.id}
+                      content={
+                        <TalentTooltip
+                          talent={talent}
+                          blocker={talentBlocker(
+                            talent,
+                            getPointsToUnlock(tier),
+                            characterLevel,
+                            availablePoints,
+                          )}
+                        />
+                      }
+                    >
                       {/* Talent Square */}
                       <button
                         onClick={() => {

@@ -40,6 +40,8 @@ export interface ItemTemplate {
 
 export interface Item extends ItemTemplate {
   level: number;
+  // enemy scale the item was rolled at; missing on items from older saves
+  scale?: number;
   rarity: ItemRarity;
   equipped: boolean;
   mainEffects: Effect[];

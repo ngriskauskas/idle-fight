@@ -5,6 +5,7 @@ import { AuraSpell, Combatant, MagicSpell, PhysicalSpell } from "../types";
 import { Trigger, TriggerAction, TriggerType } from "../types/triggers";
 import { getCombatant } from "../utils/getCombatant";
 import { launchMagicAttack, launchPhysicalAttack } from "./attackActions";
+import { logDamage } from "./logActions";
 import { getScaleMulti } from "./progressionActions";
 
 // What a player's procs and aura ticks scale with: attack for fighters, mana cost for casters.
@@ -21,6 +22,24 @@ const TRIGGER_STATUS_SHARE = 0.01;
 const SELF_STATUS_SHARE = 1 / 3;
 
 const SHATTER_POWER_SHARE = 0.05;
+
+// stands in for the spell in the log when a shatter deals its damage
+const SHATTER_LOG_SPELL: MagicSpell = {
+  id: "shatter-inline",
+  name: "Shatter",
+  description: "Consumed stacks burst for damage.",
+  icon: "ice",
+  spellType: "magic",
+  damage: { base: 0, total: 0, current: 0 },
+  attackCost: { base: 0, total: 0, current: 0 },
+  unlockCost: 0,
+  unlocked: true,
+  critChance: { base: 0, total: 0, current: 0 },
+  critMultiplier: { base: 1, total: 1, current: 1 },
+  manaCost: { base: 0, total: 0, current: 0 },
+  isAoe: false,
+  statusStats: {},
+};
 const SPEED_BOOST_COOLDOWN_TICKS = 10;
 
 // Stacks a status trigger applies. A player's grow with their power and status gear, so
@@ -227,6 +246,7 @@ export function getTriggerMap(
     shatterStatus: () => {
       const target = getOpponents(combatant)[0];
       if (!target) return;
+      let dealt = 0;
       useGameStore.setState((state) => {
         const targetState = getCombatant(target.id, state)!;
         const status = targetState.statusEffects.find((se) => se.type === trigger.status);
@@ -240,7 +260,16 @@ export function getTriggerMap(
         targetState.shield.current -= shieldDamage;
         targetState.health.current -= damage - shieldDamage;
         status.stacks = 0;
+        dealt = damage;
       });
+      if (dealt > 0) {
+        logDamage(combatant, [target], SHATTER_LOG_SPELL, dealt, {
+          damage: dealt,
+          isCrit: false,
+          isAoe: false,
+          statusStats: {},
+        });
+      }
     },
     healPerOwnStatus: () => {
       useGameStore.setState((state) => {

@@ -4,13 +4,15 @@ interface TooltipProps {
   children: React.ReactNode;
   content: React.ReactNode;
   className?: string;
+  // only show on mouse hover, so a tap goes straight to the child
+  hoverOnly?: boolean;
 }
 
 const MARGIN = 8;
 
 // Mouse: shows on hover. Touch: the first tap shows the tooltip and the next
 // tap goes through to the child, so anything can be read before it is used.
-export function Tooltip({ children, content, className }: TooltipProps) {
+export function Tooltip({ children, content, className, hoverOnly }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -85,7 +87,7 @@ export function Tooltip({ children, content, className }: TooltipProps) {
           if (e.pointerType === "mouse") setIsVisible(false);
         }}
         onClickCapture={(e) => {
-          if (pointerType.current === "mouse" || isVisible) return;
+          if (hoverOnly || pointerType.current === "mouse" || isVisible) return;
           e.preventDefault();
           e.stopPropagation();
           setIsVisible(true);

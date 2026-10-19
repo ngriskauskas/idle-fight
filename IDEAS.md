@@ -2,9 +2,7 @@
 
 ## Shop System
 
-- Ability to sell items for currency
-- Combine/craft items from components
-- Merge duplicates for enhanced versions
+- Merge duplicates for enhanced versions (selling, the rotating shop and the 4-into-1 smith are in)
 
 ## Progression
 

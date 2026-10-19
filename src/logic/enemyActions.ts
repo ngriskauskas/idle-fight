@@ -5,6 +5,7 @@ import type { Enemy, EnemyPreset } from "../types/enemy";
 import { progressEnemy, getScaleMulti } from "./progressionActions";
 import { gainXp } from "./characterActions";
 import { dropItem } from "./itemActions";
+import { gainKillGold } from "./shopActions";
 import { logKill } from "./logActions";
 import { callTriggerAction, callTriggers } from "./triggerActions";
 import { getCombatant } from "../utils/getCombatant";
@@ -232,6 +233,7 @@ export function killEnemy(enemyId: string): void {
 
   logKill(enemy, xpReward);
   gainXp(xpReward);
+  gainKillGold(enemy.isBoss);
 
   const character = getCombatant("main", state)! as Character;
 

@@ -1,0 +1,14 @@
+{
+  "version": "0.1.0",
+  "source": "origin/prod a1fbaaa (merge of PR #4)",
+  "artifact": "idle-fight-itch.zip",
+  "sha256": "e9c777bd7efc1a78aca7e3dc09a56f206176d187d3c8aa6b9e5a90d5e07f0632",
+  "game": "https://ngrisk.itch.io/idle-fight",
+  "gameId": 5171441,
+  "uploadId": 19875519,
+  "replaced": "same-name idle-fight-itch.zip (140kb) in place; played-in-browser re-ticked",
+  "visibility": "unchanged (published)",
+  "verified": "hosted iframe loads bundle index-C-Ra1LcT.js; Items tab shows Shop and Smith",
+  "limitations": "page description and screenshots not updated; no devlog; existing-save migration not run against a real save",
+  "timestamp": "2026-10-19"
+}
